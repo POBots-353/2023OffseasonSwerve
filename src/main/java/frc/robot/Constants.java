@@ -44,10 +44,10 @@ public final class Constants {
 
     public static final Translation2d[] wheelLocations = { frontLeft, frontRight, backLeft, backRight };
 
-    public static final double maxTranslationalSpeed = Units.feetToMeters(8.5);
+    public static final double maxTranslationalSpeed = Units.feetToMeters(10.0);
     public static final double maxAngularSpeed = Units.degreesToRadians(180);
 
-    public static final double maxTranslationalAcceleration = Units.feetToMeters(30.0);
+    public static final double maxTranslationalAcceleration = Units.feetToMeters(20.0);
     public static final double maxAngularAcceleration = Units.degreesToRadians(360.0);
 
     public static final double wheelCircumference = Units.inchesToMeters(4) * Math.PI;
@@ -65,11 +65,11 @@ public final class Constants {
 
     public static final boolean chassisSkewCorrection = true;
 
-    public static final double driveP = 0.1;
+    public static final double driveP = 0.10;
 
     public static final double driveKs = 0.11196;
     public static final double driveKv = 2.3939;
-    public static final double driveKa = 0.10385;
+    public static final double driveKa = 0.15385;
 
     public static final double turnP = 0.3;
     public static final double turnD = 0;
@@ -90,14 +90,14 @@ public final class Constants {
     public static final double maxModuleSpeed = Units.feetToMeters(14.5);
 
     public static class AutoConstants {
-      public static final double maxVelocity = 2.5;
-      public static final double maxAcceleration = 2.5;
+      public static final double maxVelocity = 4.0;
+      public static final double maxAcceleration = 3.0;
 
       public static final double translationalP = 6.0;
       public static final double translationalI = 0.0;
       public static final double translationalD = 0.0;
 
-      public static final double rotationalP = 2.0;
+      public static final double rotationalP = 4.0;
       public static final double rotationalI = 0.0;
       public static final double rotationalD = 0.0;
     }

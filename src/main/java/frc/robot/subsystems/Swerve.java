@@ -4,9 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -148,7 +145,6 @@ public class Swerve extends SubsystemBase {
 
   public void setChassisSpeeds(ChassisSpeeds speeds, boolean isOpenLoop) {
     // Open loop compensation to correct for skewing
-    // Made by Team 254
     // https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
     if (SwerveConstants.chassisSkewCorrection) {
       double dt = 0.02;
