@@ -14,6 +14,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.SPI;
@@ -25,6 +26,7 @@ import frc.robot.Constants.SwerveConstants.BackLeftModule;
 import frc.robot.Constants.SwerveConstants.BackRightModule;
 import frc.robot.Constants.SwerveConstants.FrontLeftModule;
 import frc.robot.Constants.SwerveConstants.FrontRightModule;
+import frc.robot.util.AllianceUtil;
 
 public class Swerve extends SubsystemBase {
   private SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(SwerveConstants.wheelLocations);
@@ -208,6 +210,16 @@ public class Swerve extends SubsystemBase {
     swerveOdometry.resetPosition(getRotation(), getModulePositions(), pose);
   }
 
+  public void resetOdometry(Pose2d pose, Trajectory trajectory) {
+    resetOdometry(pose);
+
+    field.getObject("trajectory").setTrajectory(trajectory);
+  }
+
+  public void clearTrajectory() {
+    field.getObject("trajectory").setPoses(new Pose2d[] {});
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -216,7 +228,9 @@ public class Swerve extends SubsystemBase {
     backLeftModule.setState(targetStates[2], isOpenLoop);
     backRightModule.setState(targetStates[3], isOpenLoop);
 
-    field.setRobotPose(swerveOdometry.update(getRotation(), getModulePositions()));
+    swerveOdometry.update(getRotation(), getModulePositions());
+
+    field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
 
     SmartDashboard.putNumber("Front Left Velocity", frontLeftModule.getVelocity());
     SmartDashboard.putNumber("Front Left Rotation", frontLeftModule.getAngle().getDegrees());

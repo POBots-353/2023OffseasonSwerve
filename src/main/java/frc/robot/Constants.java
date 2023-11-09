@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -23,6 +24,13 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
   public static class OperatorConstants {
     public static final int driverControllerPort = 0;
+  }
+
+  public static class FieldConstants {
+    public static final double FIELD_WIDTH = 8.2296;
+    public static final double FIELD_LENGTH = 16.4592;
+
+    public static final Pose2d redAllianceOrigin = new Pose2d(FIELD_LENGTH, FIELD_WIDTH, Rotation2d.fromDegrees(180.0));
   }
 
   public static class SwerveConstants {

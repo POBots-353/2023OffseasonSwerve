@@ -10,6 +10,7 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.SwerveConstants.AutoConstants;
 import frc.robot.subsystems.Swerve;
 
@@ -26,7 +27,7 @@ public class FollowPath extends PPSwerveControllerCommand {
         swerve::setChassisSpeeds, true, swerve);
 
     this.swerve = swerve;
-    this.trajectory = trajectory;
+    this.trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, DriverStation.getAlliance());
   }
 
   public FollowPath(String path, Swerve swerve) {
@@ -44,6 +45,8 @@ public class FollowPath extends PPSwerveControllerCommand {
   @Override
   public void end(boolean interrupted) {
     super.end(interrupted);
+
     swerve.lockModules();
+    swerve.clearTrajectory();
   }
 }
