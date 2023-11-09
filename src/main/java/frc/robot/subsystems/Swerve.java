@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -220,6 +223,26 @@ public class Swerve extends SubsystemBase {
     field.getObject("trajectory").setPoses(new Pose2d[] {});
   }
 
+  private void publishModuleStates() {
+    double[] moduleStates = new double[] { frontLeftModule.getAngle().getDegrees(), frontLeftModule.getVelocity(),
+        frontRightModule.getAngle().getDegrees(), frontRightModule.getVelocity(),
+        backLeftModule.getAngle().getDegrees(), backLeftModule.getVelocity(), backRightModule.getAngle().getDegrees(),
+        backRightModule.getVelocity() };
+
+    SmartDashboard.putNumberArray("Module States", moduleStates);
+
+    double[] desiredStates = new double[] { frontLeftModule.getDesiredState().angle.getDegrees(),
+        frontLeftModule.getDesiredState().speedMetersPerSecond,
+        frontRightModule.getDesiredState().angle.getDegrees(),
+        frontRightModule.getDesiredState().speedMetersPerSecond, backLeftModule.getDesiredState().angle.getDegrees(),
+        backLeftModule.getDesiredState().speedMetersPerSecond, backRightModule.getDesiredState().angle.getDegrees(),
+        backRightModule.getDesiredState().speedMetersPerSecond };
+
+    SmartDashboard.putNumberArray("Desired States", desiredStates);
+
+    SmartDashboard.putNumber("Robot Angle", Rotation2d.fromDegrees(-navx.getAngle()).getDegrees());
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -232,20 +255,11 @@ public class Swerve extends SubsystemBase {
 
     field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
 
-    SmartDashboard.putNumber("Front Left Velocity", frontLeftModule.getVelocity());
-    SmartDashboard.putNumber("Front Left Rotation", frontLeftModule.getAngle().getDegrees());
-    SmartDashboard.putNumber("Front Left Absolute Rotation", frontLeftModule.getAbsoluteAngle().getDegrees());
+    frontLeftModule.updateTelemetry("Front Left");
+    frontRightModule.updateTelemetry("Front Right");
+    backLeftModule.updateTelemetry("Back Left");
+    backRightModule.updateTelemetry("Back Right");
 
-    SmartDashboard.putNumber("Front Right Velocity", frontRightModule.getVelocity());
-    SmartDashboard.putNumber("Front Right Rotation", frontRightModule.getAngle().getDegrees());
-    SmartDashboard.putNumber("Front Right Absolute Rotation", frontRightModule.getAbsoluteAngle().getDegrees());
-
-    SmartDashboard.putNumber("Back Left Velocity", backLeftModule.getVelocity());
-    SmartDashboard.putNumber("Back Left Rotation", backLeftModule.getAngle().getDegrees());
-    SmartDashboard.putNumber("Back Left Absolute Rotation", backLeftModule.getAbsoluteAngle().getDegrees());
-
-    SmartDashboard.putNumber("Back Right Velocity", backRightModule.getVelocity());
-    SmartDashboard.putNumber("Back Right Rotation", backRightModule.getAngle().getDegrees());
-    SmartDashboard.putNumber("Back Right Absolute Rotation", backRightModule.getAbsoluteAngle().getDegrees());
+    publishModuleStates();
   }
 }

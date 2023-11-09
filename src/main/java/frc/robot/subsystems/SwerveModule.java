@@ -19,6 +19,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
 
 /** Add your docs here. */
@@ -38,6 +39,8 @@ public class SwerveModule {
 
   private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(SwerveConstants.driveKs,
       SwerveConstants.driveKv, SwerveConstants.driveKa);
+
+  private SwerveModuleState desiredState = new SwerveModuleState();
 
   private double prevVelocity = 0.0;
 
@@ -140,7 +143,18 @@ public class SwerveModule {
           ArbFFUnits.kVoltage);
     }
 
+    desiredState = optimizedState;
     prevVelocity = currentVelocity;
+  }
+
+  public void updateTelemetry(String moduleName) {
+    SmartDashboard.putNumber(moduleName + "/Velocity", getVelocity());
+    SmartDashboard.putNumber(moduleName + "/Angle", getAngle().getDegrees());
+    SmartDashboard.putNumber(moduleName + "/Absolute Angle", getAbsoluteAngle().getDegrees());
+    SmartDashboard.putNumber(moduleName + "/Desired Velocity", desiredState.speedMetersPerSecond);
+    SmartDashboard.putNumber(moduleName + "/Desired Angle", desiredState.angle.getDegrees());
+    SmartDashboard.putNumber(moduleName + "/Velocity Error", desiredState.speedMetersPerSecond - getVelocity());
+    SmartDashboard.putNumber(moduleName + "/Angle Error", desiredState.angle.minus(getAngle()).getDegrees());
   }
 
   public SwerveModulePosition getModulePosition() {
@@ -149,6 +163,10 @@ public class SwerveModule {
 
   public SwerveModuleState getModuleState() {
     return new SwerveModuleState(getVelocity(), getAngle());
+  }
+
+  public SwerveModuleState getDesiredState() {
+    return desiredState;
   }
 
   public double getVelocity() {
