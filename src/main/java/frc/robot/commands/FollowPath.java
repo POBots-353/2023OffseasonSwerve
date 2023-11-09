@@ -37,7 +37,7 @@ public class FollowPath extends PPSwerveControllerCommand {
 
   @Override
   public void initialize() {
-    swerve.resetOdometry(trajectory.getInitialHolonomicPose());
+    swerve.resetOdometry(trajectory.getInitialHolonomicPose(), trajectory);
 
     super.initialize();
   }
