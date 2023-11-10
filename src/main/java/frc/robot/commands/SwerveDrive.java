@@ -101,7 +101,7 @@ public class SwerveDrive extends CommandBase {
       }
 
       swerve.driveFieldOriented(forwardMetersPerSecond, strafeMetersPerSecond, angleXComponent * maxAngularSpeed,
-          true, isOpenLoop);
+          false, isOpenLoop);
     } else {
       angularRateLimiter.reset(0.0);
 
@@ -114,9 +114,9 @@ public class SwerveDrive extends CommandBase {
         angularSpeed = MathUtil.clamp(angularSpeed, -0.75, 0.75);
 
         swerve.driveFieldOriented(forwardMetersPerSecond, strafeMetersPerSecond,
-            angularSpeed * SwerveConstants.turnToAngleMaxVelocity, true, false);
+            angularSpeed * SwerveConstants.turnToAngleMaxVelocity, false, false);
       } else {
-        swerve.driveFieldOriented(forwardMetersPerSecond, strafeMetersPerSecond, 0.0, true, isOpenLoop);
+        swerve.driveFieldOriented(forwardMetersPerSecond, strafeMetersPerSecond, 0.0, false, isOpenLoop);
       }
     }
   }
