@@ -69,7 +69,7 @@ public final class Constants {
 
     public static final double driveKs = 0.11196;
     public static final double driveKv = 2.3939;
-    public static final double driveKa = 0.15385;
+    public static final double driveKa = 0.05385; // 0.15385
 
     public static final double turnP = 0.3;
     public static final double turnD = 0;
@@ -78,6 +78,9 @@ public final class Constants {
     public static final double headingD = 0;
 
     public static final double turnToAngleMaxVelocity = Units.degreesToRadians(180.0);
+
+    public static final double kpTranslation = 0.0;
+    public static final double kpRotation = 0.0;
 
     public static final double openLoopRamp = 0.25;
     public static final double closedLoopRamp = 0.0;
