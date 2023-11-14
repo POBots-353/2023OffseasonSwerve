@@ -63,7 +63,7 @@ public final class Constants {
     public static final boolean turnMotorInverted = true;
     public static final boolean canCoderInverted = false;
 
-    public static final double chassisSkewFudgeFactor = 0.05;
+    public static final double chassisSkewFudgeFactor = 0.095;
 
     public static final double driveP = 0.15;
 
@@ -90,10 +90,10 @@ public final class Constants {
     public static final double maxModuleSpeed = Units.feetToMeters(14.5);
 
     public static class AutoConstants {
-      public static final double maxVelocity = 4.0;
-      public static final double maxAcceleration = 3.0;
+      public static final double maxVelocity = 3.50;
+      public static final double maxAcceleration = 2.5;
 
-      public static final double translationalP = 6.0;
+      public static final double translationalP = 5.0;
       public static final double translationalI = 0.0;
       public static final double translationalD = 0.0;
 
