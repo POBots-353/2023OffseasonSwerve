@@ -6,9 +6,9 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -16,7 +16,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.SPI;
@@ -47,10 +46,6 @@ public class Swerve extends SubsystemBase {
 
   private SwerveModuleState[] targetStates = { new SwerveModuleState(), new SwerveModuleState(),
       new SwerveModuleState(), new SwerveModuleState() };
-
-  private PIDController vxController = new PIDController(SwerveConstants.kpTranslation, 0, 0);
-  private PIDController vyController = new PIDController(SwerveConstants.kpTranslation, 0, 0);
-  private PIDController vthetaController = new PIDController(SwerveConstants.kpRotation, 0, 0);
 
   private AHRS navx = new AHRS(SPI.Port.kMXP);
 
@@ -108,6 +103,13 @@ public class Swerve extends SubsystemBase {
         backLeftModule.getModuleState(), backRightModule.getModuleState() };
   }
 
+  public ChassisSpeeds getFudgeFactoredSpeeds(ChassisSpeeds speeds) {
+    var factored = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)
+        .rotateBy(new Rotation2d(speeds.omegaRadiansPerSecond * SwerveConstants.chassisSkewFudgeFactor).unaryMinus());
+
+    return new ChassisSpeeds(factored.getX(), factored.getY(), speeds.omegaRadiansPerSecond);
+  }
+
   /**
    * Drives the robot relative to the field
    * 
@@ -118,52 +120,56 @@ public class Swerve extends SubsystemBase {
    * @param turn    The angular velocity of the robot (CCW is +)
    */
   public void driveFieldOriented(double forward, double strafe, double turn) {
-    driveFieldOriented(forward, strafe, turn, false, false);
+    driveFieldOriented(forward, strafe, turn, true, false);
   }
 
   /**
    * Drives the robot relative to the field
    * 
-   * @param forward    The forward velocity of the robot. Positive is going away
-   *                   from your alliance wall
-   * @param strafe     The sideways velocity of the robot. Positive is going to
-   *                   the right when you are standing behind the alliance wall
-   * @param turn       The angular velocity of the robot (CCW is +)
-   * @param isOpenLoop Weather the drive motors should be open loop
+   * @param forward     The forward velocity of the robot. Positive is going away
+   *                    from your alliance wall
+   * @param strafe      The sideways velocity of the robot. Positive is going to
+   *                    the right when you are standing behind the alliance wall
+   * @param turn        The angular velocity of the robot (CCW is +)
+   * @param fudgeFactor Weather or not to adjust the translation of the robot
+   *                    relative to the turning speed
+   * @param isOpenLoop  Weather the drive motors should be open loop
    */
-  public void driveFieldOriented(double forward, double strafe, double turn, boolean usePID, boolean isOpenLoop) {
+  public void driveFieldOriented(double forward, double strafe, double turn, boolean fudgeFactor, boolean isOpenLoop) {
     ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(forward, -strafe, turn, getRotation());
-    setChassisSpeeds(chassisSpeeds, usePID, isOpenLoop);
+    setChassisSpeeds(chassisSpeeds, fudgeFactor, isOpenLoop);
   }
 
   public void driveRobotOriented(double forward, double strafe, double turn) {
-    driveRobotOriented(forward, strafe, turn, false, false);
+    driveRobotOriented(forward, strafe, turn, true, false);
   }
 
-  public void driveRobotOriented(double forward, double strafe, double turn, boolean usePID, boolean isOpenLoop) {
+  public void driveRobotOriented(double forward, double strafe, double turn, boolean fudgeFactor, boolean isOpenLoop) {
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(forward, -strafe, turn);
-    setChassisSpeeds(chassisSpeeds, false, isOpenLoop);
+    setChassisSpeeds(chassisSpeeds, fudgeFactor, isOpenLoop);
   }
 
   public void setChassisSpeeds(ChassisSpeeds speeds) {
-    setChassisSpeeds(speeds, false, false);
+    setChassisSpeeds(speeds, true, false);
   }
 
-  public void setChassisSpeeds(ChassisSpeeds speeds, boolean usePID, boolean isOpenLoop) {
+  public void setChassisSpeeds(ChassisSpeeds speeds, boolean fudgeFactor, boolean isOpenLoop) {
     // Open loop compensation to correct for skewing
     // https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
-    if (SwerveConstants.chassisSkewCorrection) {
-      double dt = 0.02;
+    double dt = 0.02;
 
-      Pose2d robotPoseVelocity = new Pose2d(speeds.vxMetersPerSecond * dt,
-          speeds.vyMetersPerSecond * dt, Rotation2d.fromRadians(speeds.omegaRadiansPerSecond * dt));
+    Pose2d robotPoseVelocity = new Pose2d(speeds.vxMetersPerSecond * dt,
+        speeds.vyMetersPerSecond * dt, Rotation2d.fromRadians(speeds.omegaRadiansPerSecond * dt));
 
-      Twist2d twistVelocity = new Pose2d().log(robotPoseVelocity);
+    Twist2d twistVelocity = new Pose2d().log(robotPoseVelocity);
 
-      speeds = new ChassisSpeeds(twistVelocity.dx / dt, twistVelocity.dy / dt, twistVelocity.dtheta / dt);
+    speeds = new ChassisSpeeds(twistVelocity.dx / dt, twistVelocity.dy / dt, twistVelocity.dtheta / dt);
+
+    if (fudgeFactor) {
+      speeds = getFudgeFactoredSpeeds(speeds);
     }
 
-    setModuleStates(swerveKinematics.toSwerveModuleStates(speeds), usePID, isOpenLoop);
+    setModuleStates(swerveKinematics.toSwerveModuleStates(speeds), isOpenLoop);
   }
 
   public void lockModules() {
@@ -173,34 +179,15 @@ public class Swerve extends SubsystemBase {
   public void lockModules(boolean isOpenLoop) {
     setModuleStates(new SwerveModuleState[] { new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
         new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
-        new SwerveModuleState(0, Rotation2d.fromDegrees(45)) }, false, isOpenLoop);
+        new SwerveModuleState(0, Rotation2d.fromDegrees(45)) }, isOpenLoop);
   }
 
   public void setModuleStates(SwerveModuleState[] states) {
-    setModuleStates(states, false, false);
+    setModuleStates(states, false);
   }
 
-  public void setModuleStates(SwerveModuleState[] states, boolean usePID, boolean isOpenLoop) {
+  public void setModuleStates(SwerveModuleState[] states, boolean isOpenLoop) {
     SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.maxModuleSpeed);
-
-    if (usePID) {
-      ChassisSpeeds currentSpeeds = getChassisSpeeds();
-      ChassisSpeeds desiredSpeeds = swerveKinematics.toChassisSpeeds(states);
-
-      if ((Math.abs(desiredSpeeds.vxMetersPerSecond) > 0.5 && Math.abs(desiredSpeeds.vyMetersPerSecond) > 0.5)
-          && Math.abs(desiredSpeeds.omegaRadiansPerSecond) > Units.degreesToRadians(3.0)) {
-        double vx = vxController.calculate(currentSpeeds.vxMetersPerSecond, desiredSpeeds.vxMetersPerSecond);
-        double vy = vyController.calculate(currentSpeeds.vyMetersPerSecond, desiredSpeeds.vyMetersPerSecond);
-        double vrotation = vthetaController.calculate(currentSpeeds.omegaRadiansPerSecond,
-            desiredSpeeds.omegaRadiansPerSecond);
-
-        desiredSpeeds = new ChassisSpeeds(desiredSpeeds.vxMetersPerSecond + vx, desiredSpeeds.vyMetersPerSecond + vy,
-            desiredSpeeds.omegaRadiansPerSecond + vrotation);
-
-        states = swerveKinematics.toSwerveModuleStates(desiredSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.maxModuleSpeed);
-      }
-    }
 
     targetStates = states;
     this.isOpenLoop = isOpenLoop;

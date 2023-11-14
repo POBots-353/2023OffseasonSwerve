@@ -63,7 +63,7 @@ public final class Constants {
     public static final boolean turnMotorInverted = true;
     public static final boolean canCoderInverted = false;
 
-    public static final boolean chassisSkewCorrection = true;
+    public static final double chassisSkewFudgeFactor = 0.05;
 
     public static final double driveP = 0.15;
 
@@ -78,9 +78,6 @@ public final class Constants {
     public static final double headingD = 0;
 
     public static final double turnToAngleMaxVelocity = Units.degreesToRadians(180.0);
-
-    public static final double kpTranslation = 0.0;
-    public static final double kpRotation = 0.0;
 
     public static final double openLoopRamp = 0.25;
     public static final double closedLoopRamp = 0.0;
