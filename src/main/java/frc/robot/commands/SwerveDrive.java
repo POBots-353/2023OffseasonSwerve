@@ -82,12 +82,12 @@ public class SwerveDrive extends CommandBase {
     forwardMetersPerSecond = forwardRateLimiter.calculate(forwardMetersPerSecond);
     strafeMetersPerSecond = strafeRateLimiter.calculate(strafeMetersPerSecond);
 
-    if (Math.abs(forwardMetersPerSecond) < 0.05) {
+    if (Math.abs(forwardMetersPerSecond) < 0.025) {
       forwardMetersPerSecond = 0.0;
       forwardRateLimiter.reset(0.0);
     }
 
-    if (Math.abs(strafeMetersPerSecond) < 0.05) {
+    if (Math.abs(strafeMetersPerSecond) < 0.025) {
       strafeMetersPerSecond = 0.0;
       strafeRateLimiter.reset(0.0);
     }
@@ -95,7 +95,7 @@ public class SwerveDrive extends CommandBase {
     if (!turnToAngle.getAsBoolean()) {
       angleXComponent = angularRateLimiter.calculate(angleXComponent);
 
-      if (Math.abs(angleXComponent) < Units.degreesToRadians(1.0)) {
+      if (Math.abs(angleXComponent) < Units.degreesToRadians(0.5)) {
         angleXComponent = 0.0;
         angularRateLimiter.reset(0.0);
       }
