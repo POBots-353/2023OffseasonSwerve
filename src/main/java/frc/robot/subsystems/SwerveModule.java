@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -115,6 +116,7 @@ public class SwerveModule {
   private void configureAngleEncoder() {
     canEncoder.configFactoryDefault();
 
+    canEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 20);
     canEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
     canEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     canEncoder.configSensorDirection(SwerveConstants.canCoderInverted);
