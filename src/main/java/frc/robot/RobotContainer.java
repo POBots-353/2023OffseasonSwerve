@@ -75,6 +75,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new FollowPath("New New Path", swerve);
+    return new FollowPath("New Path", swerve).andThen(Commands.run(swerve::lockModules, swerve));
   }
 }
