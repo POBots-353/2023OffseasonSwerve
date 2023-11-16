@@ -77,7 +77,7 @@ public final class Constants {
     public static final double headingP = 0.75;
     public static final double headingD = 0;
 
-    public static final double turnToAngleMaxVelocity = Units.degreesToRadians(180.0);
+    public static final double turnToAngleMaxVelocity = Units.degreesToRadians(270.0);
 
     public static final double openLoopRamp = 0.25;
     public static final double closedLoopRamp = 0.0;
