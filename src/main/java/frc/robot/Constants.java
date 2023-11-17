@@ -44,10 +44,10 @@ public final class Constants {
 
     public static final Translation2d[] wheelLocations = { frontLeft, frontRight, backLeft, backRight };
 
-    public static final double maxTranslationalSpeed = Units.feetToMeters(10.0);
+    public static final double maxTranslationalSpeed = Units.feetToMeters(12.5);
     public static final double maxAngularSpeed = Units.degreesToRadians(180);
 
-    public static final double maxTranslationalAcceleration = Units.feetToMeters(17.5);
+    public static final double maxTranslationalAcceleration = Units.feetToMeters(25);
     public static final double maxAngularAcceleration = Units.degreesToRadians(270.0);
 
     public static final double wheelCircumference = Units.inchesToMeters(4) * Math.PI;
