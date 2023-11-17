@@ -64,6 +64,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     SmartDashboard.putNumber("Code Runtime Ms", (Timer.getFPGATimestamp() - startTime) * 1000.0);
+    SmartDashboard.putNumber("CAN Utilization %", RobotController.getCANStatus().percentBusUtilization * 100.0);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
