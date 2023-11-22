@@ -74,7 +74,7 @@ public final class Constants {
     public static final double turnP = 0.65;
     public static final double turnD = 0;
 
-    public static final double headingP = 0.75;
+    public static final double headingP = 0.55;
     public static final double headingD = 0;
 
     public static final double turnToAngleMaxVelocity = Units.degreesToRadians(270.0);
