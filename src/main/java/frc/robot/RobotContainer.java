@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.commands.FollowAprilTag;
 import frc.robot.commands.FollowPath;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.subsystems.Swerve;
@@ -62,6 +63,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    driverController.leftTrigger().whileTrue(new FollowAprilTag(swerve));
+
     driverController.x().whileTrue(Commands.run(swerve::lockModules, swerve));
 
     driverController.start().and(driverController.back())
