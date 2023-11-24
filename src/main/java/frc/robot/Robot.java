@@ -9,6 +9,7 @@ import com.pathplanner.lib.server.PathPlannerServer;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,8 +34,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    DataLogManager.start();
-    DriverStation.startDataLog(DataLogManager.getLog());
+    if (RobotBase.isReal()) {
+      DataLogManager.start();
+      DriverStation.startDataLog(DataLogManager.getLog());
+    }
 
     PathPlannerServer.startServer(5855);
     CameraServer.startAutomaticCapture();
