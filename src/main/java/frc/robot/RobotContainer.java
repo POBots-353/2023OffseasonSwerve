@@ -4,13 +4,13 @@
 
 package frc.robot;
 
+import frc.lib.controllers.VirtualXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.commands.FollowAprilTag;
 import frc.robot.commands.FollowPath;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.subsystems.Swerve;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -30,10 +30,8 @@ public class RobotContainer {
   private Swerve swerve = new Swerve();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController driverController = new CommandXboxController(
+  private final VirtualXboxController driverController = new VirtualXboxController(
       OperatorConstants.driverControllerPort);
-
-  private final XboxController driverControllerHID = driverController.getHID();
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -44,7 +42,7 @@ public class RobotContainer {
 
     swerve.setDefaultCommand(
         new SwerveDrive(driverController::getLeftY, driverController::getLeftX,
-            driverController::getRightX, driverController::getRightY, driverControllerHID::getLeftBumper,
+            driverController::getRightX, driverController::getRightY, driverController::getLeftBumper,
             SwerveConstants.maxTranslationalSpeed, SwerveConstants.maxAngularSpeed, swerve));
   }
 
