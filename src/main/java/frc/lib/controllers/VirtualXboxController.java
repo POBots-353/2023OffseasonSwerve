@@ -235,6 +235,18 @@ public class VirtualXboxController extends CommandXboxController {
     virtualButtons.replace(button, state);
   }
 
+  public void disableAllAxes() {
+    for (Axis axis : virtualAxes.keySet()) {
+      virtualAxes.replace(axis, Optional.empty());
+    }
+  }
+
+  public void disableAllButtons() {
+    for (Button button : virtualButtons.keySet()) {
+      virtualButtons.replace(button, false);
+    }
+  }
+
   public void setLeftX(double value) {
     setVirtualAxis(Axis.kLeftX, value);
   }

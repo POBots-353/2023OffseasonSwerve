@@ -24,6 +24,7 @@ public class Alert {
   private static Map<String, SendableAlerts> groups = new HashMap<String, SendableAlerts>();
 
   private final AlertType type;
+  private final String group;
   private boolean active = false;
   private double activeStartTime = 0.0;
   private String text;
@@ -55,7 +56,21 @@ public class Alert {
 
     this.text = text;
     this.type = type;
+    this.group = group;
     groups.get(group).alerts.add(this);
+  }
+
+  /**
+   * Adds the alert to its group if it has been previously removed
+   */
+  private void addIfNotPresent() {
+    if (!groups.get(group).alerts.contains(this)) {
+      groups.get(group).alerts.add(this);
+    }
+  }
+
+  public AlertType getType() {
+    return type;
   }
 
   /**
@@ -63,6 +78,7 @@ public class Alert {
    * be sent to the console.
    */
   public void set(boolean active) {
+    addIfNotPresent();
     if (active && !this.active) {
       activeStartTime = Timer.getFPGATimestamp();
       switch (type) {
@@ -82,6 +98,7 @@ public class Alert {
 
   /** Updates current alert text. */
   public void setText(String text) {
+    addIfNotPresent();
     if (active && !text.equals(this.text)) {
       switch (type) {
         case ERROR:
@@ -96,6 +113,10 @@ public class Alert {
       }
     }
     this.text = text;
+  }
+
+  public void removeFromGroup() {
+    groups.get(group).alerts.remove(this);
   }
 
   private static class SendableAlerts implements Sendable {
