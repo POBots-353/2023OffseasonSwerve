@@ -22,6 +22,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.util.Alert;
+import frc.robot.util.Alert.AlertType;
 
 /** Add your docs here. */
 public class SwerveModule {
@@ -44,6 +46,11 @@ public class SwerveModule {
   private SwerveModuleState desiredState = new SwerveModuleState();
 
   private double prevVelocity = 0.0;
+
+  private Alert driveMotorTemperatureAlert = new Alert("SwerveAlerts", "drive motor temperature is above 60°C",
+      AlertType.WARNING);
+  private Alert turnMotorTemperatureAlert = new Alert("SwerveAlerts", "turn motor temperature is above 60°C",
+      AlertType.WARNING);
 
   public SwerveModule(int driveID, int turnID, int encoderID, Rotation2d angleOffset) {
     driveMotor = new CANSparkMax(driveID, MotorType.kBrushless);
@@ -150,6 +157,7 @@ public class SwerveModule {
   }
 
   public void updateTelemetry(String moduleName) {
+    // Setpoint data
     SmartDashboard.putNumber(moduleName + "/Velocity", getVelocity());
     SmartDashboard.putNumber(moduleName + "/Angle", getAngle().getDegrees());
     SmartDashboard.putNumber(moduleName + "/Absolute Angle", getAbsoluteAngle().getDegrees());
@@ -157,6 +165,33 @@ public class SwerveModule {
     SmartDashboard.putNumber(moduleName + "/Desired Angle", desiredState.angle.getDegrees());
     SmartDashboard.putNumber(moduleName + "/Velocity Error", desiredState.speedMetersPerSecond - getVelocity());
     SmartDashboard.putNumber(moduleName + "/Angle Error", desiredState.angle.minus(getAngle()).getDegrees());
+
+    // Other information about the motors (output, voltage, etc)
+    SmartDashboard.putNumber(moduleName + "/Drive Temperature", driveMotor.getMotorTemperature());
+    SmartDashboard.putNumber(moduleName + "/Turn Temperature", turnMotor.getMotorTemperature());
+    SmartDashboard.putNumber(moduleName + "/Drive Applied Output", driveMotor.getAppliedOutput());
+    SmartDashboard.putNumber(moduleName + "/Turn Applied Output", turnMotor.getAppliedOutput());
+    SmartDashboard.putNumber(moduleName + "/Drive Output Current", driveMotor.getOutputCurrent());
+    SmartDashboard.putNumber(moduleName + "/Turn Output Current", turnMotor.getOutputCurrent());
+
+    // Alerts for high temperature
+    double driveMotorTemperature = driveMotor.getMotorTemperature();
+    if (driveMotorTemperature >= SwerveConstants.maxDriveTemperature) {
+      driveMotorTemperatureAlert
+          .setText(moduleName + " drive motor temperature is above 60°C (" + driveMotorTemperature + "°C)");
+      driveMotorTemperatureAlert.set(true);
+    } else {
+      driveMotorTemperatureAlert.set(false);
+    }
+
+    double turnMotorTemperature = turnMotor.getMotorTemperature();
+    if (turnMotorTemperature >= SwerveConstants.maxTurnTemperature) {
+      turnMotorTemperatureAlert
+          .setText(moduleName + " turn motor temperature is above 60°C (" + turnMotorTemperature + "°C)");
+      turnMotorTemperatureAlert.set(true);
+    } else {
+      turnMotorTemperatureAlert.set(false);
+    }
   }
 
   public SwerveModulePosition getModulePosition() {

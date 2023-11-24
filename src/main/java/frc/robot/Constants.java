@@ -87,6 +87,9 @@ public final class Constants {
     public static final int driveCurrentLimit = 60;
     public static final int turnCurrentLimit = 20;
 
+    public static final double maxDriveTemperature = 60.0;
+    public static final double maxTurnTemperature = 60.0;
+
     public static final double maxModuleSpeed = Units.feetToMeters(14.5);
 
     public static class AutoConstants {
