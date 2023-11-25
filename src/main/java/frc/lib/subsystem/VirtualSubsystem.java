@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.controllers.VirtualXboxController;
@@ -17,7 +17,7 @@ import frc.robot.util.Alert.AlertType;
 
 public abstract class VirtualSubsystem extends SubsystemBase {
   protected List<Alert> systemAlerts = new ArrayList<Alert>();
-  protected String systemStatus = "Okay";
+  protected String systemStatus = "Pre-Match not ran";
 
   public final void clearAlerts() {
     for (Alert alert : systemAlerts) {
@@ -28,27 +28,29 @@ public abstract class VirtualSubsystem extends SubsystemBase {
   }
 
   public final void cancelCurrentCommand() {
-    Command currentCommand = CommandScheduler.getInstance().requiring(this);
+    Command currentCommand = getCurrentCommand();
+    Command defaultCommand = getDefaultCommand();
 
-    if (currentCommand != null) {
+    if (currentCommand != null && (defaultCommand != null && currentCommand != defaultCommand)) {
       currentCommand.cancel();
     }
   }
 
   private final void addAlert(Alert alert) {
+    alert.set(true);
     systemAlerts.add(alert);
   }
 
   public final void addInfo(String message) {
-    addAlert(new Alert(getName() + " Alerts", message, AlertType.INFO));
+    addAlert(new Alert(getName() + "Alerts", message, AlertType.INFO));
   }
 
   public final void addWarning(String message) {
-    addAlert(new Alert(getName() + " Alerts", message, AlertType.WARNING));
+    addAlert(new Alert(getName() + "Alerts", message, AlertType.WARNING));
   }
 
   public final void addError(String message) {
-    addAlert(new Alert(getName() + " Alerts", message, AlertType.ERROR));
+    addAlert(new Alert(getName() + "Alerts", message, AlertType.ERROR));
     setSystemStatus("Prematch failed with reason: \"" + message + "\"");
   }
 
@@ -70,7 +72,7 @@ public abstract class VirtualSubsystem extends SubsystemBase {
     return false;
   }
 
-  public Command getPrematchCheckCommand(VirtualXboxController controller) {
+  public CommandBase getPrematchCheckCommand(VirtualXboxController controller) {
     return Commands.none();
   }
 }

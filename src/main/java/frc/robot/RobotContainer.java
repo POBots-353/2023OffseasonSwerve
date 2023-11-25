@@ -11,7 +11,16 @@ import frc.robot.commands.FollowAprilTag;
 import frc.robot.commands.FollowPath;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.subsystems.Swerve;
+import frc.robot.util.Alert;
+import frc.robot.util.Alert.AlertType;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -33,17 +42,64 @@ public class RobotContainer {
   private final VirtualXboxController driverController = new VirtualXboxController(
       OperatorConstants.driverControllerPort);
 
+  private List<Alert> robotAlerts = new ArrayList<Alert>();
+
+  private Alert swervePrematchAlert = new Alert("", AlertType.INFO);
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    configurePreMatchChecks();
+
+    SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
 
     swerve.setDefaultCommand(
         new SwerveDrive(driverController::getLeftY, driverController::getLeftX,
             driverController::getRightX, driverController::getRightY, driverController::getLeftBumper,
             SwerveConstants.maxTranslationalSpeed, SwerveConstants.maxAngularSpeed, swerve));
+  }
+
+  private void clearRobotAlerts() {
+    for (Alert alert : robotAlerts) {
+      alert.removeFromGroup();
+    }
+
+    robotAlerts.clear();
+  }
+
+  private void removeAlert(Alert alert) {
+    alert.removeFromGroup();
+    robotAlerts.remove(alert);
+  }
+
+  private boolean errorsPresent() {
+    for (Alert alert : robotAlerts) {
+      if (alert.getType() == AlertType.ERROR) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private void addAlert(Alert alert) {
+    alert.set(true);
+    robotAlerts.add(alert);
+  }
+
+  public void addErrorAlert(String message) {
+    addAlert(new Alert(message, AlertType.ERROR));
+  }
+
+  public void addWarningAlert(String message) {
+    addAlert(new Alert(message, AlertType.WARNING));
+  }
+
+  public void addInfoAlert(String message) {
+    addAlert(new Alert(message, AlertType.INFO));
   }
 
   /**
@@ -67,6 +123,32 @@ public class RobotContainer {
 
     driverController.start().and(driverController.back())
         .toggleOnTrue(Commands.runOnce(swerve::zeroYaw).ignoringDisable(true));
+  }
+
+  private void configurePreMatchChecks() {
+    CommandBase swervePrematch = swerve.getPrematchCheckCommand(driverController)
+        .andThen(Commands.runOnce(() -> {
+          removeAlert(swervePrematchAlert);
+          if (swerve.containsErrors()) {
+            swervePrematchAlert = new Alert("Swerve Pre-Match Failed!", AlertType.ERROR);
+          } else {
+            swervePrematchAlert = new Alert("Swerve Pre-Match Successful!", AlertType.INFO);
+          }
+          addAlert(swervePrematchAlert);
+        }));
+
+    SmartDashboard.putData("Full Pre-Match", Commands.sequence(
+        Commands.runOnce(() -> clearRobotAlerts()),
+        swervePrematch.asProxy(),
+        Commands.runOnce(() -> {
+          if (!errorsPresent()) {
+            addInfoAlert("Pre-Match Successful! Good luck in the next match! Let's kick bot!");
+          } else {
+            addErrorAlert("Pre-Match Failed!");
+          }
+        })).withName("Full Pre-Match"));
+
+    SmartDashboard.putData("Swerve Pre-Match Check", swervePrematch.asProxy());
   }
 
   /**

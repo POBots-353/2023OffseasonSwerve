@@ -16,12 +16,16 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.controllers.VirtualXboxController;
+import frc.lib.subsystem.VirtualSubsystem;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveConstants.BackLeftModule;
 import frc.robot.Constants.SwerveConstants.BackRightModule;
@@ -29,7 +33,7 @@ import frc.robot.Constants.SwerveConstants.FrontLeftModule;
 import frc.robot.Constants.SwerveConstants.FrontRightModule;
 import frc.robot.util.AllianceUtil;
 
-public class Swerve extends SubsystemBase {
+public class Swerve extends VirtualSubsystem {
   private SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(SwerveConstants.wheelLocations);
 
   private SwerveModule frontLeftModule = new SwerveModule(FrontLeftModule.driveID, FrontLeftModule.turnID,
@@ -54,6 +58,8 @@ public class Swerve extends SubsystemBase {
   private Field2d field = new Field2d();
 
   private boolean isOpenLoop = false;
+
+  private final double prematchDriveDelay = 1.0;
 
   /** Creates a new Swerve. */
   public Swerve() {
@@ -263,11 +269,149 @@ public class Swerve extends SubsystemBase {
 
     field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
 
+    SmartDashboard.putString("Swerve/Status", getSystemStatus());
+
     frontLeftModule.updateTelemetry("Front Left");
     frontRightModule.updateTelemetry("Front Right");
     backLeftModule.updateTelemetry("Back Left");
     backRightModule.updateTelemetry("Back Right");
 
     publishModuleStates();
+  }
+
+  @Override
+  public CommandBase getPrematchCheckCommand(VirtualXboxController controller) {
+    return Commands.sequence(
+        Commands.runOnce(() -> {
+          cancelCurrentCommand();
+          clearAlerts();
+          setSystemStatus("Running Pre-Match Check");
+        }),
+        // Test gyro zeroing
+        Commands.runOnce(() -> {
+          controller.setStartButton(true);
+          controller.setBackButton(true);
+        }),
+        Commands.waitSeconds(0.2),
+        Commands.runOnce(() -> {
+          if (Math.abs(getRotation().getDegrees()) > 0.15) {
+            addError("Gyro failed to zero");
+          } else {
+            addInfo("Gyro zero successful");
+          }
+
+          controller.disableAllButtons();
+        }),
+        // Test forward speed
+        Commands.runOnce(() -> {
+          controller.setLeftY(-1.0);
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        Commands.runOnce(() -> {
+          if (getChassisSpeeds().vxMetersPerSecond < Units.feetToMeters(10.0)) {
+            addError("Forward speed too slow");
+          } else {
+            addInfo("Forward drive successful");
+          }
+
+          controller.disableAllAxes();
+        }),
+        // Test slowing down to 0 m/s
+        Commands.waitSeconds(prematchDriveDelay),
+        Commands.runOnce(() -> {
+          if (Math.abs(getChassisSpeeds().vxMetersPerSecond) > Units.feetToMeters(0.1)
+              || Math.abs(getChassisSpeeds().vyMetersPerSecond) > Units.feetToMeters(0.1)) {
+            addError("Robot moving too fast");
+          } else {
+            addInfo("Slow down successful");
+          }
+
+          controller.disableAllAxes();
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        // Test backward speed
+        Commands.runOnce(() -> {
+          controller.setLeftY(1.0);
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        Commands.runOnce(() -> {
+          if (getChassisSpeeds().vxMetersPerSecond > Units.feetToMeters(-10.0)) {
+            addError("Backward speed too slow");
+          } else {
+            addInfo("Backward drive successful");
+          }
+
+          controller.disableAllAxes();
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        // Test left speed
+        Commands.runOnce(() -> {
+          controller.setLeftX(-1.0);
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        Commands.runOnce(() -> {
+          if (getChassisSpeeds().vyMetersPerSecond < Units.feetToMeters(10.0)) {
+            addError("Left speed too slow");
+          } else {
+            addError("Left drive sucessful");
+          }
+
+          controller.disableAllAxes();
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        // Test right speed
+        Commands.runOnce(() -> {
+          controller.setLeftX(1.0);
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        Commands.runOnce(() -> {
+          if (getChassisSpeeds().vyMetersPerSecond > Units.feetToMeters(-10.0)) {
+            addError("Right speed too slow");
+          } else {
+            addInfo("Right drive successful");
+          }
+
+          controller.disableAllAxes();
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        // Test angular CW speed
+        Commands.runOnce(() -> {
+          controller.setRightX(1.0);
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        Commands.runOnce(() -> {
+          if (getChassisSpeeds().omegaRadiansPerSecond > Units.degreesToRadians(-160.0)) {
+            addError("Clockwise rotation too slow");
+          } else {
+            addInfo("Clockwise rotation successful");
+          }
+
+          controller.disableAllAxes();
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        // Test angular CCW speed
+        Commands.runOnce(() -> {
+          controller.setRightX(-1.0);
+        }),
+        Commands.waitSeconds(prematchDriveDelay),
+        Commands.runOnce(() -> {
+          if (getChassisSpeeds().omegaRadiansPerSecond < Units.degreesToRadians(160.0)) {
+            addError("Counter Clockwise rotation too slow");
+          } else {
+            addInfo("Counter Clockwise rotation successful");
+          }
+
+          controller.disableAllAxes();
+        }))
+        .until(this::containsErrors)
+        .andThen(() -> {
+          cancelCurrentCommand();
+          controller.disableAllAxes();
+          controller.disableAllButtons();
+
+          if (!containsErrors()) {
+            setSystemStatus("Pre-match Successful!");
+          }
+        });
   }
 }
