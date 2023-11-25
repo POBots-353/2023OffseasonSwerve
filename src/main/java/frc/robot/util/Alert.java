@@ -125,7 +125,7 @@ public class Alert {
     public String[] getStrings(AlertType type) {
       Predicate<Alert> activeFilter = (Alert x) -> x.type == type && x.active;
       Comparator<Alert> timeSorter =
-          (Alert a1, Alert a2) -> (int) (a2.activeStartTime - a1.activeStartTime);
+          (Alert a1, Alert a2) -> (int) Math.signum(a2.activeStartTime - a1.activeStartTime);
       return alerts.stream()
           .filter(activeFilter)
           .sorted(timeSorter)
