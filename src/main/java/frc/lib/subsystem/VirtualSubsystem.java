@@ -31,7 +31,7 @@ public abstract class VirtualSubsystem extends SubsystemBase {
     Command currentCommand = getCurrentCommand();
     Command defaultCommand = getDefaultCommand();
 
-    if (currentCommand != null && (defaultCommand != null && currentCommand != defaultCommand)) {
+    if (currentCommand != null && !(defaultCommand != null && currentCommand == defaultCommand)) {
       currentCommand.cancel();
     }
   }
@@ -42,15 +42,15 @@ public abstract class VirtualSubsystem extends SubsystemBase {
   }
 
   public final void addInfo(String message) {
-    addAlert(new Alert(getName() + "Alerts", message, AlertType.INFO));
+    addAlert(new Alert(getName() + "/Alerts", message, AlertType.INFO));
   }
 
   public final void addWarning(String message) {
-    addAlert(new Alert(getName() + "Alerts", message, AlertType.WARNING));
+    addAlert(new Alert(getName() + "/Alerts", message, AlertType.WARNING));
   }
 
   public final void addError(String message) {
-    addAlert(new Alert(getName() + "Alerts", message, AlertType.ERROR));
+    addAlert(new Alert(getName() + "/Alerts", message, AlertType.ERROR));
     setSystemStatus("Prematch failed with reason: \"" + message + "\"");
   }
 

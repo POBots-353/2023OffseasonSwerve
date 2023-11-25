@@ -17,6 +17,7 @@ import frc.robot.util.Alert.AlertType;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -44,6 +45,7 @@ public class RobotContainer {
 
   private List<Alert> robotAlerts = new ArrayList<Alert>();
 
+  private Alert generalPrematchAlert = new Alert("", AlertType.INFO);
   private Alert swervePrematchAlert = new Alert("", AlertType.INFO);
 
   /**
@@ -126,8 +128,35 @@ public class RobotContainer {
   }
 
   private void configurePreMatchChecks() {
-    CommandBase swervePrematch = swerve.getPrematchCheckCommand(driverController)
-        .andThen(Commands.runOnce(() -> {
+    CommandBase generalPreMatch = Commands.sequence(
+        Commands.runOnce(() -> clearRobotAlerts()),
+        Commands.runOnce(() -> {
+          if (!driverController.getHID().isConnected()) {
+            addErrorAlert("Driver controller is not connected");
+          } else {
+            addInfoAlert("Driver controller is connected");
+          }
+        }),
+        Commands.runOnce(() -> {
+          if (!DriverStation.getJoystickIsXbox(OperatorConstants.driverControllerPort)) {
+            addErrorAlert("Controller port 0 is not an Xbox controller");
+          } else {
+            addInfoAlert("Controller port 0 is the correct joystick type (Xbox Controller)");
+          }
+        }))
+        .until(this::errorsPresent)
+        .andThen(() -> {
+          removeAlert(generalPrematchAlert);
+          if (errorsPresent()) {
+            generalPrematchAlert = new Alert("General Pre-Match Failed!", AlertType.ERROR);
+          } else {
+            generalPrematchAlert = new Alert("General Pre-Match Successful!", AlertType.INFO);
+          }
+          addAlert(generalPrematchAlert);
+        }).withName("General Pre-Match");
+
+    CommandBase swervePreMatch = swerve.getPrematchCheckCommand(driverController)
+        .andThen(() -> {
           removeAlert(swervePrematchAlert);
           if (swerve.containsErrors()) {
             swervePrematchAlert = new Alert("Swerve Pre-Match Failed!", AlertType.ERROR);
@@ -135,11 +164,12 @@ public class RobotContainer {
             swervePrematchAlert = new Alert("Swerve Pre-Match Successful!", AlertType.INFO);
           }
           addAlert(swervePrematchAlert);
-        }));
+        }).withName("Swerve Pre-Match");
 
     SmartDashboard.putData("Full Pre-Match", Commands.sequence(
         Commands.runOnce(() -> clearRobotAlerts()),
-        swervePrematch.asProxy(),
+        generalPreMatch.asProxy(),
+        swervePreMatch.asProxy(),
         Commands.runOnce(() -> {
           if (!errorsPresent()) {
             addInfoAlert("Pre-Match Successful! Good luck in the next match! Let's kick bot!");
@@ -148,7 +178,8 @@ public class RobotContainer {
           }
         })).withName("Full Pre-Match"));
 
-    SmartDashboard.putData("Swerve/Pre-Match Check", swervePrematch.asProxy());
+    SmartDashboard.putData("General Pre-Match Check", generalPreMatch.asProxy());
+    SmartDashboard.putData("Swerve/Pre-Match Check", swervePreMatch.asProxy());
   }
 
   /**
