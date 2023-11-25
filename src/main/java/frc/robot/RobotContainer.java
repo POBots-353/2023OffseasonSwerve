@@ -148,7 +148,7 @@ public class RobotContainer {
           }
         })).withName("Full Pre-Match"));
 
-    SmartDashboard.putData("Swerve Pre-Match Check", swervePrematch.asProxy());
+    SmartDashboard.putData("Swerve/Pre-Match Check", swervePrematch.asProxy());
   }
 
   /**

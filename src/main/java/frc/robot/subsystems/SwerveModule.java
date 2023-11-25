@@ -47,9 +47,9 @@ public class SwerveModule {
 
   private double prevVelocity = 0.0;
 
-  private Alert driveMotorTemperatureAlert = new Alert("SwerveAlerts", "drive motor temperature is above 60°C",
+  private Alert driveMotorTemperatureAlert = new Alert("Swerve/Alerts", "drive motor temperature is above 60°C",
       AlertType.WARNING);
-  private Alert turnMotorTemperatureAlert = new Alert("SwerveAlerts", "turn motor temperature is above 60°C",
+  private Alert turnMotorTemperatureAlert = new Alert("Swerve/Alerts", "turn motor temperature is above 60°C",
       AlertType.WARNING);
 
   public SwerveModule(int driveID, int turnID, int encoderID, Rotation2d angleOffset) {
@@ -158,21 +158,23 @@ public class SwerveModule {
 
   public void updateTelemetry(String moduleName) {
     // Setpoint data
-    SmartDashboard.putNumber(moduleName + "/Velocity", getVelocity());
-    SmartDashboard.putNumber(moduleName + "/Angle", getAngle().getDegrees());
-    SmartDashboard.putNumber(moduleName + "/Absolute Angle", getAbsoluteAngle().getDegrees());
-    SmartDashboard.putNumber(moduleName + "/Desired Velocity", desiredState.speedMetersPerSecond);
-    SmartDashboard.putNumber(moduleName + "/Desired Angle", desiredState.angle.getDegrees());
-    SmartDashboard.putNumber(moduleName + "/Velocity Error", desiredState.speedMetersPerSecond - getVelocity());
-    SmartDashboard.putNumber(moduleName + "/Angle Error", desiredState.angle.minus(getAngle()).getDegrees());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Velocity", getVelocity());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Angle", getAngle().getDegrees());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Absolute Angle", getAbsoluteAngle().getDegrees());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Desired Velocity", desiredState.speedMetersPerSecond);
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Desired Angle", desiredState.angle.getDegrees());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Velocity Error",
+        desiredState.speedMetersPerSecond - getVelocity());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Angle Error",
+        desiredState.angle.minus(getAngle()).getDegrees());
 
     // Other information about the motors (output, voltage, etc)
-    SmartDashboard.putNumber(moduleName + "/Drive Temperature", driveMotor.getMotorTemperature());
-    SmartDashboard.putNumber(moduleName + "/Turn Temperature", turnMotor.getMotorTemperature());
-    SmartDashboard.putNumber(moduleName + "/Drive Applied Output", driveMotor.getAppliedOutput());
-    SmartDashboard.putNumber(moduleName + "/Turn Applied Output", turnMotor.getAppliedOutput());
-    SmartDashboard.putNumber(moduleName + "/Drive Output Current", driveMotor.getOutputCurrent());
-    SmartDashboard.putNumber(moduleName + "/Turn Output Current", turnMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Drive Temperature", driveMotor.getMotorTemperature());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Turn Temperature", turnMotor.getMotorTemperature());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Drive Applied Output", driveMotor.getAppliedOutput());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Turn Applied Output", turnMotor.getAppliedOutput());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Drive Output Current", driveMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Swerve/" + moduleName + "/Turn Output Current", turnMotor.getOutputCurrent());
 
     // Alerts for high temperature
     double driveMotorTemperature = driveMotor.getMotorTemperature();

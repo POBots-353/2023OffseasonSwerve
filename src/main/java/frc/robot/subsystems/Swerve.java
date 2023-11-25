@@ -65,10 +65,10 @@ public class Swerve extends VirtualSubsystem {
   public Swerve() {
     swerveOdometry = new SwerveDriveOdometry(swerveKinematics, navx.getRotation2d(), getModulePositions());
 
-    SmartDashboard.putData("Field", field);
+    SmartDashboard.putData("Swerve/Field", field);
 
     // Puts the Gyro on the dashboard
-    SmartDashboard.putData("Gyro", new Sendable() {
+    SmartDashboard.putData("Swerve/Gyro", new Sendable() {
       @Override
       public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Gyro");
@@ -77,7 +77,7 @@ public class Swerve extends VirtualSubsystem {
     });
 
     // Puts the swerve drive widget on the dashboard
-    SmartDashboard.putData("Swerve Drive", new Sendable() {
+    SmartDashboard.putData("Swerve/Swerve Drive", new Sendable() {
       @Override
       public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("SwerveDrive");
@@ -243,7 +243,7 @@ public class Swerve extends VirtualSubsystem {
         backLeftModule.getAngle().getDegrees(), backLeftModule.getVelocity(), backRightModule.getAngle().getDegrees(),
         backRightModule.getVelocity() };
 
-    SmartDashboard.putNumberArray("Module States", moduleStates);
+    SmartDashboard.putNumberArray("Swerve/Module States", moduleStates);
 
     double[] desiredStates = new double[] { frontLeftModule.getDesiredState().angle.getDegrees(),
         frontLeftModule.getDesiredState().speedMetersPerSecond,
@@ -252,9 +252,9 @@ public class Swerve extends VirtualSubsystem {
         backLeftModule.getDesiredState().speedMetersPerSecond, backRightModule.getDesiredState().angle.getDegrees(),
         backRightModule.getDesiredState().speedMetersPerSecond };
 
-    SmartDashboard.putNumberArray("Desired States", desiredStates);
+    SmartDashboard.putNumberArray("Swerve/Desired States", desiredStates);
 
-    SmartDashboard.putNumber("Robot Angle", Rotation2d.fromDegrees(-navx.getAngle()).getDegrees());
+    SmartDashboard.putNumber("Swerve/Robot Angle", Rotation2d.fromDegrees(-navx.getAngle()).getDegrees());
   }
 
   @Override
