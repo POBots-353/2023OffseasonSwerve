@@ -83,9 +83,9 @@ public class SwerveModule {
     driveMotor.enableVoltageCompensation(SwerveConstants.voltageCompensation);
     driveMotor.setSmartCurrentLimit(SwerveConstants.driveCurrentLimit);
 
-    turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500);
-    turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
-    turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
 
     drivePID = driveMotor.getPIDController();
 
@@ -94,6 +94,8 @@ public class SwerveModule {
 
     driveEncoder.setPositionConversionFactor(SwerveConstants.drivePositionConversion);
     driveEncoder.setVelocityConversionFactor(SwerveConstants.driveVelocityConversion);
+
+    driveMotor.burnFlash();
   }
 
   public void configureTurnMotor() {
@@ -118,6 +120,8 @@ public class SwerveModule {
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(-Math.PI);
     turnPID.setPositionPIDWrappingMaxInput(Math.PI);
+
+    turnMotor.burnFlash();
   }
 
   private void configureAngleEncoder() {
