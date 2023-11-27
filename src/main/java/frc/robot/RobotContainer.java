@@ -153,7 +153,9 @@ public class RobotContainer {
             generalPrematchAlert = new Alert("General Pre-Match Successful!", AlertType.INFO);
           }
           addAlert(generalPrematchAlert);
-        }).withName("General Pre-Match");
+        })
+        .unless(DriverStation::isFMSAttached)
+        .withName("General Pre-Match");
 
     CommandBase swervePreMatch = swerve.getPrematchCheckCommand(driverController)
         .andThen(() -> {
@@ -164,7 +166,9 @@ public class RobotContainer {
             swervePrematchAlert = new Alert("Swerve Pre-Match Successful!", AlertType.INFO);
           }
           addAlert(swervePrematchAlert);
-        }).withName("Swerve Pre-Match");
+        })
+        .unless(DriverStation::isFMSAttached)
+        .withName("Swerve Pre-Match");
 
     SmartDashboard.putData("Full Pre-Match", Commands.sequence(
         Commands.runOnce(() -> clearRobotAlerts()),
@@ -176,7 +180,9 @@ public class RobotContainer {
           } else {
             addErrorAlert("Pre-Match Failed!");
           }
-        })).withName("Full Pre-Match"));
+        }))
+        .unless(DriverStation::isFMSAttached)
+        .withName("Full Pre-Match"));
 
     SmartDashboard.putData("General Pre-Match Check", generalPreMatch.asProxy());
     SmartDashboard.putData("Swerve/Swerve Pre-Match Check", swervePreMatch.asProxy());
