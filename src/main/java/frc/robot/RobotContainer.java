@@ -121,7 +121,7 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.leftTrigger().whileTrue(new FollowAprilTag(swerve));
 
-    driverController.x().whileTrue(Commands.run(swerve::lockModules, swerve));
+    driverController.x().whileTrue(Commands.run(swerve::lockModules, swerve).withName("Lock Modules"));
 
     driverController.start().and(driverController.back())
         .toggleOnTrue(Commands.runOnce(swerve::zeroYaw).ignoringDisable(true));
@@ -179,7 +179,7 @@ public class RobotContainer {
         })).withName("Full Pre-Match"));
 
     SmartDashboard.putData("General Pre-Match Check", generalPreMatch.asProxy());
-    SmartDashboard.putData("Swerve/Pre-Match Check", swervePreMatch.asProxy());
+    SmartDashboard.putData("Swerve/Swerve Pre-Match Check", swervePreMatch.asProxy());
   }
 
   /**

@@ -328,7 +328,6 @@ public class Swerve extends VirtualSubsystem {
 
           controller.disableAllAxes();
         }),
-        Commands.waitSeconds(prematchDriveDelay),
         // Test backward speed
         Commands.runOnce(() -> {
           controller.setLeftY(1.0);
@@ -353,7 +352,7 @@ public class Swerve extends VirtualSubsystem {
           if (getChassisSpeeds().vyMetersPerSecond < Units.feetToMeters(10.0)) {
             addError("Left speed too slow");
           } else {
-            addError("Left drive sucessful");
+            addInfo("Left drive sucessful");
           }
 
           controller.disableAllAxes();
@@ -404,13 +403,16 @@ public class Swerve extends VirtualSubsystem {
           controller.disableAllAxes();
         }))
         .until(this::containsErrors)
+        .handleInterrupt(() -> {
+          addError("Pre-Match Interrupted");
+        })
         .andThen(() -> {
           cancelCurrentCommand();
           controller.disableAllAxes();
           controller.disableAllButtons();
 
           if (!containsErrors()) {
-            setSystemStatus("Pre-match Successful!");
+            setSystemStatus("Pre-Match Successful!");
           }
         });
   }
