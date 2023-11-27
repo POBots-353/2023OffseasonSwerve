@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -39,6 +40,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private Swerve swerve = new Swerve();
 
+  private SendableChooser<Command> autoChooser = new SendableChooser<>();
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final VirtualXboxController driverController = new VirtualXboxController(
       OperatorConstants.driverControllerPort);
@@ -54,6 +57,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    configureAutoChooser();
     configurePreMatchChecks();
 
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
@@ -62,46 +66,6 @@ public class RobotContainer {
         new SwerveDrive(driverController::getLeftY, driverController::getLeftX,
             driverController::getRightX, driverController::getRightY, driverController::getLeftBumper,
             SwerveConstants.maxTranslationalSpeed, SwerveConstants.maxAngularSpeed, swerve));
-  }
-
-  private void clearRobotAlerts() {
-    for (Alert alert : robotAlerts) {
-      alert.removeFromGroup();
-    }
-
-    robotAlerts.clear();
-  }
-
-  private void removeAlert(Alert alert) {
-    alert.removeFromGroup();
-    robotAlerts.remove(alert);
-  }
-
-  private boolean errorsPresent() {
-    for (Alert alert : robotAlerts) {
-      if (alert.getType() == AlertType.ERROR) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private void addAlert(Alert alert) {
-    alert.set(true);
-    robotAlerts.add(alert);
-  }
-
-  public void addErrorAlert(String message) {
-    addAlert(new Alert(message, AlertType.ERROR));
-  }
-
-  public void addWarningAlert(String message) {
-    addAlert(new Alert(message, AlertType.WARNING));
-  }
-
-  public void addInfoAlert(String message) {
-    addAlert(new Alert(message, AlertType.INFO));
   }
 
   /**
@@ -125,6 +89,17 @@ public class RobotContainer {
 
     driverController.start().and(driverController.back())
         .toggleOnTrue(Commands.runOnce(swerve::zeroYaw).ignoringDisable(true));
+  }
+
+  private void configureAutoChooser() {
+    autoChooser.setDefaultOption("None", Commands.none());
+    autoChooser.addOption("[Demo] Follow April Tag", new FollowAprilTag(swerve));
+    autoChooser.addOption("[PathPlanner] New Path (Test Path 1)",
+        new FollowPath("New Path", swerve).andThen(Commands.run(swerve::lockModules, swerve)));
+    autoChooser.addOption("[PathPlanner] New New Path (Test Path 2)",
+        new FollowPath("New New Path", swerve).andThen(Commands.run(swerve::lockModules, swerve)));
+
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   private void configurePreMatchChecks() {
@@ -188,14 +163,52 @@ public class RobotContainer {
     SmartDashboard.putData("Swerve/Swerve Pre-Match Check", swervePreMatch.asProxy());
   }
 
+  private void clearRobotAlerts() {
+    for (Alert alert : robotAlerts) {
+      alert.removeFromGroup();
+    }
+
+    robotAlerts.clear();
+  }
+
+  private void removeAlert(Alert alert) {
+    alert.removeFromGroup();
+    robotAlerts.remove(alert);
+  }
+
+  private boolean errorsPresent() {
+    for (Alert alert : robotAlerts) {
+      if (alert.getType() == AlertType.ERROR) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private void addAlert(Alert alert) {
+    alert.set(true);
+    robotAlerts.add(alert);
+  }
+
+  public void addErrorAlert(String message) {
+    addAlert(new Alert(message, AlertType.ERROR));
+  }
+
+  public void addWarningAlert(String message) {
+    addAlert(new Alert(message, AlertType.WARNING));
+  }
+
+  public void addInfoAlert(String message) {
+    addAlert(new Alert(message, AlertType.INFO));
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new FollowAprilTag(swerve);
-    // An example command will be run in autonomous
-    // return new FollowPath("New Path", swerve).andThen(Commands.run(swerve::lockModules, swerve));
+    return autoChooser.getSelected();
   }
 }
