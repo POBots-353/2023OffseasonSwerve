@@ -47,9 +47,9 @@ public class SwerveModule {
 
   private double prevVelocity = 0.0;
 
-  private Alert driveMotorTemperatureAlert = new Alert("Swerve/Alerts", "drive motor temperature is above 60°C",
+  private Alert driveMotorTemperatureAlert = new Alert("Swerve/Alerts", "drive motor temperature is above 50°C",
       AlertType.WARNING);
-  private Alert turnMotorTemperatureAlert = new Alert("Swerve/Alerts", "turn motor temperature is above 60°C",
+  private Alert turnMotorTemperatureAlert = new Alert("Swerve/Alerts", "turn motor temperature is above 50°C",
       AlertType.WARNING);
 
   public SwerveModule(int driveID, int turnID, int encoderID, Rotation2d angleOffset) {
@@ -180,7 +180,7 @@ public class SwerveModule {
     double driveMotorTemperature = driveMotor.getMotorTemperature();
     if (driveMotorTemperature >= SwerveConstants.maxDriveTemperature) {
       driveMotorTemperatureAlert
-          .setText(moduleName + " drive motor temperature is above 60°C (" + driveMotorTemperature + "°C)");
+          .setText(moduleName + " drive motor temperature is above 50°C (" + driveMotorTemperature + "°C)");
       driveMotorTemperatureAlert.set(true);
     } else {
       driveMotorTemperatureAlert.set(false);
@@ -189,7 +189,7 @@ public class SwerveModule {
     double turnMotorTemperature = turnMotor.getMotorTemperature();
     if (turnMotorTemperature >= SwerveConstants.maxTurnTemperature) {
       turnMotorTemperatureAlert
-          .setText(moduleName + " turn motor temperature is above 60°C (" + turnMotorTemperature + "°C)");
+          .setText(moduleName + " turn motor temperature is above 50°C (" + turnMotorTemperature + "°C)");
       turnMotorTemperatureAlert.set(true);
     } else {
       turnMotorTemperatureAlert.set(false);
