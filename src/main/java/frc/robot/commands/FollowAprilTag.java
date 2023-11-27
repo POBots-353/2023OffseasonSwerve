@@ -5,9 +5,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.SwerveConstants.AutoAlignConstants;
@@ -19,18 +18,22 @@ public class FollowAprilTag extends CommandBase {
 
   final double desiredZDistance = 1.5;
 
-  PIDController forwardController = new PIDController(1.25, 0, 0);
-  PIDController strafeController = new PIDController(1.25, 0, 0);
-  PIDController rotationController = new PIDController(0.75, 0, 0);
+  private PIDController forwardController = new PIDController(1.25, 0, 0);
+  private PIDController strafeController = new PIDController(1.25, 0, 0);
+  private PIDController rotationController = new PIDController(0.75, 0, 0);
 
-  private ProfiledPIDController forwardProfiledController = new ProfiledPIDController(1.25, 0, 0,
-      new Constraints(AutoAlignConstants.maxTranslationalSpeed, Units.feetToMeters(10.0)));
-  private ProfiledPIDController rotationProfiledController = new ProfiledPIDController(1.25, 0, 0,
-      new Constraints(AutoAlignConstants.maxRotationalSpeed, Units.degreesToRadians(360.0)));
+  private SlewRateLimiter forwardRateLimiter = new SlewRateLimiter(AutoAlignConstants.maxTranslationalAcceleration);
+  private SlewRateLimiter strafeRateLimiter = new SlewRateLimiter(AutoAlignConstants.maxTranslationalAcceleration);
+  private SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(AutoAlignConstants.maxRotationalAcceleration);
 
   /** Creates a new FollowAprilTag. */
   public FollowAprilTag(Swerve swerve) {
     this.swerve = swerve;
+
+    forwardController.setTolerance(Units.inchesToMeters(2.0));
+    strafeController.setTolerance(Units.inchesToMeters(2.0));
+    rotationController.setTolerance(Units.degreesToRadians(1.0));
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(swerve);
   }
@@ -46,12 +49,26 @@ public class FollowAprilTag extends CommandBase {
     if (LimelightHelpers.getTV("limelight")) {
       Pose3d targetPose = LimelightHelpers.getTargetPose3d_CameraSpace("limelight");
 
-      double forwardSpeed = forwardProfiledController.calculate(targetPose.getZ(), desiredZDistance);
-          // * AutoAlignConstants.maxTranslationalSpeed;
-      double strafeSpeed = -forwardProfiledController.calculate(targetPose.getX(), 0.0);
-          // * AutoAlignConstants.maxTranslationalSpeed;
-      double rotationSpeed = rotationProfiledController.calculate(targetPose.getRotation().getY(), 0.0);
-          // * AutoAlignConstants.maxRotationalSpeed;
+      double forwardSpeed = -forwardController.calculate(targetPose.getZ(), desiredZDistance)
+          * AutoAlignConstants.maxTranslationalSpeed;
+      double strafeSpeed = -strafeController.calculate(targetPose.getX(), 0.0)
+          * AutoAlignConstants.maxTranslationalSpeed;
+      double rotationSpeed = rotationController.calculate(targetPose.getRotation().getY(), 0.0)
+          * AutoAlignConstants.maxRotationalSpeed;
+
+      if (forwardSpeed == 0.0) {
+        forwardRateLimiter.reset(0.0);
+      }
+      if (strafeSpeed == 0.0) {
+        strafeRateLimiter.reset(0.0);
+      }
+      if (rotationSpeed == 0.0) {
+        rotationRateLimiter.reset(0.0);
+      }
+
+      forwardSpeed = forwardRateLimiter.calculate(forwardSpeed);
+      strafeSpeed = strafeRateLimiter.calculate(strafeSpeed);
+      rotationSpeed = rotationRateLimiter.calculate(rotationSpeed);
 
       swerve.driveRobotOriented(forwardSpeed, strafeSpeed, rotationSpeed, true, true);
     } else {

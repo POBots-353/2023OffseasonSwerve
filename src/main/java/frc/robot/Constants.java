@@ -93,8 +93,11 @@ public final class Constants {
     public static final double maxModuleSpeed = Units.feetToMeters(14.5);
 
     public static class AutoAlignConstants {
-      public static final double maxTranslationalSpeed = Units.feetToMeters(2.5);
+      public static final double maxTranslationalSpeed = Units.feetToMeters(5.0);
+      public static final double maxTranslationalAcceleration = Units.feetToMeters(10.0);
+
       public static final double maxRotationalSpeed = Units.degreesToRadians(180);
+      public static final double maxRotationalAcceleration = Units.degreesToRadians(360);
     }
 
     public static class AutoConstants {
