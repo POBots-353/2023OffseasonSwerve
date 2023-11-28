@@ -18,8 +18,8 @@ public class FollowAprilTag extends CommandBase {
 
   final double desiredZDistance = 1.5;
 
-  private PIDController forwardController = new PIDController(1.25, 0, 0);
-  private PIDController strafeController = new PIDController(1.25, 0, 0);
+  private PIDController forwardController = new PIDController(1.5, 0, 0);
+  private PIDController strafeController = new PIDController(1.5, 0, 0);
   private PIDController rotationController = new PIDController(0.75, 0, 0);
 
   private SlewRateLimiter forwardRateLimiter = new SlewRateLimiter(AutoAlignConstants.maxTranslationalAcceleration);
@@ -30,9 +30,9 @@ public class FollowAprilTag extends CommandBase {
   public FollowAprilTag(Swerve swerve) {
     this.swerve = swerve;
 
-    forwardController.setTolerance(Units.inchesToMeters(2.0));
-    strafeController.setTolerance(Units.inchesToMeters(2.0));
-    rotationController.setTolerance(Units.degreesToRadians(1.0));
+    forwardController.setTolerance(Units.inchesToMeters(3.0));
+    strafeController.setTolerance(Units.inchesToMeters(3.0));
+    rotationController.setTolerance(Units.degreesToRadians(2.0));
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(swerve);
