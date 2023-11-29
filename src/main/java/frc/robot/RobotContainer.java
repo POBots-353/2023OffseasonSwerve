@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,6 +41,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private Swerve swerve = new Swerve();
 
+  private PowerDistribution powerDistribution = new PowerDistribution();
+
   private SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -61,6 +64,7 @@ public class RobotContainer {
     configurePreMatchChecks();
 
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
+    SmartDashboard.putData("Power Distribution Panel", powerDistribution);
 
     swerve.setDefaultCommand(
         new SwerveDrive(driverController::getLeftY, driverController::getLeftX,
