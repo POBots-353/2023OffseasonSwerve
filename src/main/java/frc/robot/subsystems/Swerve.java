@@ -257,6 +257,12 @@ public class Swerve extends VirtualSubsystem {
     SmartDashboard.putNumber("Swerve/Robot Angle", Rotation2d.fromDegrees(-navx.getAngle()).getDegrees());
   }
 
+  public void updateOdometry() {
+    swerveOdometry.update(getRotation(), getModulePositions());
+
+    field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -264,10 +270,6 @@ public class Swerve extends VirtualSubsystem {
     frontRightModule.setState(targetStates[1], isOpenLoop);
     backLeftModule.setState(targetStates[2], isOpenLoop);
     backRightModule.setState(targetStates[3], isOpenLoop);
-
-    swerveOdometry.update(getRotation(), getModulePositions());
-
-    field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
 
     SmartDashboard.putString("Swerve/Status", getSystemStatus());
 

@@ -92,6 +92,8 @@ public final class Constants {
 
     public static final double maxModuleSpeed = Units.feetToMeters(14.5);
 
+    public static final int odometryUpdateFrequency = 100; // 100 Hz (every 10 ms)
+
     public static class AutoAlignConstants {
       public static final double maxTranslationalSpeed = Units.feetToMeters(5.0);
       public static final double maxTranslationalAcceleration = Units.feetToMeters(10.0);

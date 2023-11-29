@@ -68,6 +68,10 @@ public class RobotContainer {
             SwerveConstants.maxTranslationalSpeed, SwerveConstants.maxAngularSpeed, swerve));
   }
 
+  public void updateSwerveOdometry() {
+    swerve.updateOdometry();
+  }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
