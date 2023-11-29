@@ -98,7 +98,7 @@ public final class Constants {
       public static final double maxTranslationalSpeed = Units.feetToMeters(5.0);
       public static final double maxTranslationalAcceleration = Units.feetToMeters(10.0);
 
-      public static final double maxRotationalSpeed = Units.degreesToRadians(180);
+      public static final double maxRotationalSpeed = Units.degreesToRadians(270);
       public static final double maxRotationalAcceleration = Units.degreesToRadians(360);
     }
 

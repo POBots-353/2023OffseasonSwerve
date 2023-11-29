@@ -73,6 +73,10 @@ public class FollowAprilTag extends CommandBase {
       swerve.driveRobotOriented(forwardSpeed, strafeSpeed, rotationSpeed, true, true);
     } else {
       swerve.driveRobotOriented(0.0, 0.0, 0.0, true, true);
+
+      forwardRateLimiter.reset(0.0);
+      strafeRateLimiter.reset(0.0);
+      rotationRateLimiter.reset(0.0);
     }
   }
 
