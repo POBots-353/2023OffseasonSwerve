@@ -79,7 +79,7 @@ public final class Constants {
 
     public static final double turnToAngleMaxVelocity = Units.degreesToRadians(270.0);
 
-    public static final double openLoopRamp = 0.25;
+    public static final double openLoopRamp = 0.15;
     public static final double closedLoopRamp = 0.0;
 
     public static final double voltageCompensation = 12.0;
