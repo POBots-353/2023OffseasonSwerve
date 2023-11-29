@@ -208,7 +208,8 @@ public class Swerve extends VirtualSubsystem {
 
     navx.zeroYaw();
 
-    swerveOdometry.resetPosition(getRotation(), getModulePositions(), originalOdometryPosition);
+    swerveOdometry.resetPosition(new Rotation2d(0.0), getModulePositions(),
+        new Pose2d(originalOdometryPosition.getTranslation(), new Rotation2d(0.0)));
   }
 
   public Rotation2d getRotation() {
