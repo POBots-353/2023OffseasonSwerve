@@ -89,6 +89,8 @@ public class SwerveModule {
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 1000 / SwerveConstants.odometryUpdateFrequency);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 500);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 500);
 
     drivePID = driveMotor.getPIDController();
 
@@ -114,6 +116,8 @@ public class SwerveModule {
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 1000 / SwerveConstants.odometryUpdateFrequency);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
+    turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 500);
+    turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 500);
 
     turnEncoder.setPositionConversionFactor(SwerveConstants.turnPositionConversion);
 

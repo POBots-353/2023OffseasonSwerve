@@ -260,8 +260,6 @@ public class Swerve extends VirtualSubsystem {
 
   public void updateOdometry() {
     swerveOdometry.update(getRotation(), getModulePositions());
-
-    field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
   }
 
   @Override
@@ -271,6 +269,8 @@ public class Swerve extends VirtualSubsystem {
     frontRightModule.setState(targetStates[1], isOpenLoop);
     backLeftModule.setState(targetStates[2], isOpenLoop);
     backRightModule.setState(targetStates[3], isOpenLoop);
+
+    field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
 
     SmartDashboard.putString("Swerve/Status", getSystemStatus());
 
