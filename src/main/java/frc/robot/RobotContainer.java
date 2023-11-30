@@ -91,8 +91,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverController.leftTrigger().whileTrue(new FollowAprilTag(swerve));
-
     driverController.x().whileTrue(Commands.run(swerve::lockModules, swerve).withName("Lock Modules"));
 
     driverController.start().and(driverController.back())
