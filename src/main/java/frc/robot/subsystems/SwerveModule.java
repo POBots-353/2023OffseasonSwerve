@@ -75,6 +75,8 @@ public class SwerveModule {
   }
 
   public void configureDriveMotor() {
+    driveMotor.restoreFactoryDefaults();
+
     driveMotor.setInverted(SwerveConstants.driveMotorInverted);
 
     driveMotor.setOpenLoopRampRate(SwerveConstants.openLoopRamp);
@@ -96,10 +98,12 @@ public class SwerveModule {
     driveEncoder.setPositionConversionFactor(SwerveConstants.drivePositionConversion);
     driveEncoder.setVelocityConversionFactor(SwerveConstants.driveVelocityConversion);
 
-    // driveMotor.burnFlash();
+    driveMotor.burnFlash();
   }
 
   public void configureTurnMotor() {
+    turnMotor.restoreFactoryDefaults();
+
     turnMotor.setInverted(SwerveConstants.turnMotorInverted);
 
     turnMotor.enableVoltageCompensation(SwerveConstants.voltageCompensation);
@@ -123,7 +127,7 @@ public class SwerveModule {
     turnPID.setPositionPIDWrappingMinInput(-Math.PI);
     turnPID.setPositionPIDWrappingMaxInput(Math.PI);
 
-    // turnMotor.burnFlash();
+    turnMotor.burnFlash();
   }
 
   private void configureAngleEncoder() {
