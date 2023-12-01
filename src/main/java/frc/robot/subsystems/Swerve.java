@@ -290,6 +290,14 @@ public class Swerve extends VirtualSubsystem {
           clearAlerts();
           setSystemStatus("Running Pre-Match Check");
         }),
+        // Make sure gyro is connected
+        Commands.runOnce(() -> {
+          if (!navx.isConnected()) {
+            addError("NavX is not connected");
+          } else {
+            addInfo("NavX is connected");
+          }
+        }),
         // Test gyro zeroing
         Commands.runOnce(() -> {
           controller.setStartButton(true);
@@ -297,7 +305,7 @@ public class Swerve extends VirtualSubsystem {
         }),
         Commands.waitSeconds(0.2),
         Commands.runOnce(() -> {
-          if (Math.abs(getRotation().getDegrees()) > 0.15) {
+          if (Math.abs(getRotation().getDegrees()) > 0.05) {
             addError("Gyro failed to zero");
           } else {
             addInfo("Gyro zero successful");
