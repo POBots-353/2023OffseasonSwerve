@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.Consumer;
+
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderStatusFrame;
@@ -12,6 +14,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
@@ -21,6 +24,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
@@ -208,6 +213,31 @@ public class SwerveModule {
     } else {
       turnMotorTemperatureAlert.set(false);
     }
+  }
+
+  public Command getPrematchCommand(String moduleName, Consumer<String> onInfoAlert, Consumer<String> onWarningAlert,
+      Consumer<String> onErrorAlert) {
+    return Commands.sequence(
+        // Check if drive motor is in brake mode
+        Commands.runOnce(() -> {
+          if (driveMotor.getIdleMode() != IdleMode.kBrake) {
+            onWarningAlert
+                .accept(moduleName + " Drive Motor (Motor ID: " + driveMotor.getDeviceId() + ") is not in brake mode");
+          } else {
+            onInfoAlert
+                .accept(moduleName + " Drive Motor (Motor ID: " + driveMotor.getDeviceId() + ") is in brake mode");
+          }
+        }),
+        // Check if turn motor is in coast mode
+        Commands.runOnce(() -> {
+          if (turnMotor.getIdleMode() != IdleMode.kCoast) {
+            onWarningAlert
+                .accept(moduleName + " Turn Motor (Motor ID: " + turnMotor.getDeviceId() + ") is not in coast mode");
+          } else {
+            onInfoAlert
+                .accept(moduleName + " Turn Motor (Motor ID: " + turnMotor.getDeviceId() + ") is in coast mode");
+          }
+        }));
   }
 
   public SwerveModulePosition getModulePosition() {

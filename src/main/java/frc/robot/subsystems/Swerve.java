@@ -313,6 +313,12 @@ public class Swerve extends VirtualSubsystem {
 
           controller.disableAllButtons();
         }),
+        // Test all modules
+        Commands.parallel(
+            frontLeftModule.getPrematchCommand("Front Left", this::addInfo, this::addWarning, this::addError),
+            frontRightModule.getPrematchCommand("Front Right", this::addInfo, this::addWarning, this::addError),
+            backLeftModule.getPrematchCommand("Back Left", this::addInfo, this::addWarning, this::addError),
+            backRightModule.getPrematchCommand("Back Right", this::addInfo, this::addWarning, this::addError)),
         // Test forward speed
         Commands.runOnce(() -> {
           controller.setLeftY(-1.0);
