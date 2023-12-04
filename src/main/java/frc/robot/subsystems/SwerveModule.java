@@ -6,11 +6,14 @@ package frc.robot.subsystems;
 
 import java.util.function.Consumer;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderFaults;
 import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
@@ -38,7 +41,7 @@ public class SwerveModule {
   private RelativeEncoder driveEncoder;
   private RelativeEncoder turnEncoder;
 
-  private CANCoder canEncoder;
+  private CANCoder canCoder;
 
   private Rotation2d angleOffset;
 
@@ -64,7 +67,7 @@ public class SwerveModule {
     driveEncoder = driveMotor.getEncoder();
     turnEncoder = turnMotor.getEncoder();
 
-    canEncoder = new CANCoder(encoderID);
+    canCoder = new CANCoder(encoderID);
 
     this.angleOffset = angleOffset;
 
@@ -140,17 +143,17 @@ public class SwerveModule {
   }
 
   private void configureAngleEncoder() {
-    canEncoder.configFactoryDefault();
+    canCoder.configFactoryDefault();
 
-    canEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 20);
-    canEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
-    canEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    canEncoder.configSensorDirection(SwerveConstants.canCoderInverted);
+    canCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 20);
+    canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
+    canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    canCoder.configSensorDirection(SwerveConstants.canCoderInverted);
   }
 
   private void resetToAbsolute() {
     Rotation2d position = Rotation2d
-        .fromDegrees(canEncoder.getAbsolutePosition() - angleOffset.getDegrees());
+        .fromDegrees(canCoder.getAbsolutePosition() - angleOffset.getDegrees());
 
     turnEncoder.setPosition(position.getRadians());
   }
@@ -218,6 +221,62 @@ public class SwerveModule {
   public Command getPrematchCommand(String moduleName, Consumer<String> onInfoAlert, Consumer<String> onWarningAlert,
       Consumer<String> onErrorAlert) {
     return Commands.sequence(
+        // Check for errors in drive motor
+        Commands.runOnce(() -> {
+          REVLibError error = driveMotor.getLastError();
+
+          if (error != REVLibError.kOk) {
+            onErrorAlert.accept(moduleName + " Drive Motor error: " + error.name());
+          } else {
+            onInfoAlert.accept(moduleName + " Drive Motor contains no errors");
+          }
+        }),
+        // Check for errors in turn motor
+        Commands.runOnce(() -> {
+          REVLibError error = turnMotor.getLastError();
+
+          if (error != REVLibError.kOk) {
+            onErrorAlert.accept(moduleName + " Turn Motor error: " + error.name());
+          } else {
+            onInfoAlert.accept(moduleName + " Turn Motor contains no errors");
+          }
+        }),
+        // Check for errors in CANCoder
+        Commands.runOnce(() -> {
+          CANCoderFaults faults = new CANCoderFaults();
+          canCoder.getFaults(faults);
+
+          boolean errorDetected = false;
+
+          if (faults.hasAnyFault()) {
+            if (faults.APIError) {
+              onErrorAlert.accept(moduleName + " CANCoder API fault detected");
+            }
+            if (faults.HardwareFault) {
+              onErrorAlert.accept(moduleName + " CANCoder hardware fault detected");
+            }
+            if (faults.ResetDuringEn) {
+              onErrorAlert.accept(moduleName + " CANCoder was reset or booted up while robot was enabled");
+            }
+            if (faults.UnderVoltage) {
+              onErrorAlert.accept(moduleName + " CANCoder is receiving less than 6.5V");
+            }
+            if (faults.MagnetTooWeak) {
+              onErrorAlert.accept(moduleName + " CANCoder magnet is too weak");
+            }
+            errorDetected = true;
+          }
+
+          ErrorCode lastError = canCoder.getLastError();
+          if (lastError != ErrorCode.OK) {
+            onErrorAlert.accept(moduleName + " CANCoder error: " + lastError.name());
+            errorDetected = true;
+          }
+
+          if (!errorDetected) {
+            onInfoAlert.accept(moduleName + " CANCoder has no errors");
+          }
+        }),
         // Check if drive motor is in brake mode
         Commands.runOnce(() -> {
           if (driveMotor.getIdleMode() != IdleMode.kBrake) {
@@ -261,6 +320,6 @@ public class SwerveModule {
   }
 
   public Rotation2d getAbsoluteAngle() {
-    return Rotation2d.fromDegrees(canEncoder.getAbsolutePosition());
+    return Rotation2d.fromDegrees(canCoder.getAbsolutePosition());
   }
 }
