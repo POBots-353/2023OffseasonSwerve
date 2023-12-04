@@ -19,6 +19,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SPI;
@@ -88,6 +89,9 @@ public class Swerve extends VirtualSubsystem {
         builder.addDoubleProperty("Z", navx::getWorldLinearAccelZ, null);
       }
     });
+
+    // (idk if we'll need the built in accelerometer but you never know)
+    SmartDashboard.putData("Swerve/Built-in Accelerometer", new BuiltInAccelerometer());
 
     // Puts the swerve drive widget on network tables
     SmartDashboard.putData("Swerve/Swerve Drive", new Sendable() {
