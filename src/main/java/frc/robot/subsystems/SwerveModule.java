@@ -26,6 +26,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,6 +37,7 @@ import frc.robot.util.Alert.AlertType;
 
 /** Add your docs here. */
 public class SwerveModule {
+  private String moduleName;
   private CANSparkMax driveMotor;
   private CANSparkMax turnMotor;
 
@@ -60,7 +63,8 @@ public class SwerveModule {
   private Alert turnMotorTemperatureAlert = new Alert("Swerve/Alerts", "turn motor temperature is above 50°C",
       AlertType.WARNING);
 
-  public SwerveModule(int driveID, int turnID, int encoderID, Rotation2d angleOffset) {
+  public SwerveModule(String moduleName, int driveID, int turnID, int encoderID, Rotation2d angleOffset) {
+    this.moduleName = moduleName;
     driveMotor = new CANSparkMax(driveID, MotorType.kBrushless);
     turnMotor = new CANSparkMax(turnID, MotorType.kBrushless);
 
@@ -76,10 +80,16 @@ public class SwerveModule {
     configureAngleEncoder();
 
     resetToAbsolute();
+
+    if (RobotBase.isReal()) {
+      DataLogManager.log(moduleName + " Drive Motor Firmware: " + driveMotor.getFirmwareString());
+      DataLogManager.log(moduleName + " Turn Motor Firmware: " + turnMotor.getFirmwareString());
+      DataLogManager.log(moduleName + " CANCoder Firmware: " + canCoder.getFirmwareVersion());
+    }
   }
 
-  public SwerveModule(int driveID, int turnID, int encoderID) {
-    this(driveID, turnID, encoderID, new Rotation2d(0));
+  public SwerveModule(String moduleName, int driveID, int turnID, int encoderID) {
+    this(moduleName, driveID, turnID, encoderID, new Rotation2d(0));
   }
 
   public void configureDriveMotor() {
@@ -178,7 +188,7 @@ public class SwerveModule {
     prevVelocity = currentVelocity;
   }
 
-  public void updateTelemetry(String moduleName) {
+  public void updateTelemetry() {
     // Setpoint data
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Velocity", getVelocity());
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Angle", getAngle().getDegrees());
@@ -218,7 +228,7 @@ public class SwerveModule {
     }
   }
 
-  public Command getPrematchCommand(String moduleName, Consumer<String> onInfoAlert, Consumer<String> onWarningAlert,
+  public Command getPrematchCommand(Consumer<String> onInfoAlert, Consumer<String> onWarningAlert,
       Consumer<String> onErrorAlert) {
     return Commands.sequence(
         // Check for errors in drive motor

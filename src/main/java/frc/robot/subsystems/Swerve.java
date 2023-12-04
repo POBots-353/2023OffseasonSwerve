@@ -19,6 +19,8 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,22 +38,22 @@ import frc.robot.util.AllianceUtil;
 public class Swerve extends VirtualSubsystem {
   private SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(SwerveConstants.wheelLocations);
 
-  private SwerveModule frontLeftModule = new SwerveModule(FrontLeftModule.driveID, FrontLeftModule.turnID,
+  private SwerveModule frontLeftModule = new SwerveModule("Front Left", FrontLeftModule.driveID, FrontLeftModule.turnID,
       FrontLeftModule.encoderID, FrontLeftModule.angleOffset);
 
-  private SwerveModule frontRightModule = new SwerveModule(FrontRightModule.driveID, FrontRightModule.turnID,
-      FrontRightModule.encoderID, FrontRightModule.angleOffset);
+  private SwerveModule frontRightModule = new SwerveModule("Front Right", FrontRightModule.driveID,
+      FrontRightModule.turnID, FrontRightModule.encoderID, FrontRightModule.angleOffset);
 
-  private SwerveModule backLeftModule = new SwerveModule(BackLeftModule.driveID, BackLeftModule.turnID,
+  private SwerveModule backLeftModule = new SwerveModule("Back Left", BackLeftModule.driveID, BackLeftModule.turnID,
       BackLeftModule.encoderID, BackLeftModule.angleOffset);
 
-  private SwerveModule backRightModule = new SwerveModule(BackRightModule.driveID, BackRightModule.turnID,
+  private SwerveModule backRightModule = new SwerveModule("Back Right", BackRightModule.driveID, BackRightModule.turnID,
       BackRightModule.encoderID, BackRightModule.angleOffset);
 
   private SwerveModuleState[] targetStates = { new SwerveModuleState(), new SwerveModuleState(),
       new SwerveModuleState(), new SwerveModuleState() };
 
-  private AHRS navx = new AHRS(SPI.Port.kMXP);
+  private AHRS navx = new AHRS(SPI.Port.kMXP, (byte) SwerveConstants.odometryUpdateFrequency);
 
   private SwerveDriveOdometry swerveOdometry;
 
@@ -67,7 +69,7 @@ public class Swerve extends VirtualSubsystem {
 
     SmartDashboard.putData("Swerve/Field", field);
 
-    // Puts the Gyro on the dashboard
+    // Puts the Gyro on network tables
     SmartDashboard.putData("Swerve/Gyro", new Sendable() {
       @Override
       public void initSendable(SendableBuilder builder) {
@@ -76,7 +78,18 @@ public class Swerve extends VirtualSubsystem {
       }
     });
 
-    // Puts the swerve drive widget on the dashboard
+    // Puts the navx's accelerometer on network tables
+    SmartDashboard.putData("Swerve/NavX Accelerometer", new Sendable() {
+      @Override
+      public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("3AxisAccelerometer");
+        builder.addDoubleProperty("X", navx::getWorldLinearAccelX, null);
+        builder.addDoubleProperty("Y", navx::getWorldLinearAccelY, null);
+        builder.addDoubleProperty("Z", navx::getWorldLinearAccelZ, null);
+      }
+    });
+
+    // Puts the swerve drive widget on network tables
     SmartDashboard.putData("Swerve/Swerve Drive", new Sendable() {
       @Override
       public void initSendable(SendableBuilder builder) {
@@ -97,6 +110,10 @@ public class Swerve extends VirtualSubsystem {
         builder.addDoubleProperty("Robot Angle", () -> getRotation().getDegrees(), null);
       }
     });
+
+    if (RobotBase.isReal()) {
+      DataLogManager.log("NavX Firmware Version: " + navx.getFirmwareVersion());
+    }
   }
 
   public SwerveModulePosition[] getModulePositions() {
@@ -274,10 +291,10 @@ public class Swerve extends VirtualSubsystem {
 
     SmartDashboard.putString("Swerve/Status", getSystemStatus());
 
-    frontLeftModule.updateTelemetry("Front Left");
-    frontRightModule.updateTelemetry("Front Right");
-    backLeftModule.updateTelemetry("Back Left");
-    backRightModule.updateTelemetry("Back Right");
+    frontLeftModule.updateTelemetry();
+    frontRightModule.updateTelemetry();
+    backLeftModule.updateTelemetry();
+    backRightModule.updateTelemetry();
 
     publishModuleStates();
   }
@@ -315,10 +332,10 @@ public class Swerve extends VirtualSubsystem {
         }),
         // Test all modules
         Commands.parallel(
-            frontLeftModule.getPrematchCommand("Front Left", this::addInfo, this::addWarning, this::addError),
-            frontRightModule.getPrematchCommand("Front Right", this::addInfo, this::addWarning, this::addError),
-            backLeftModule.getPrematchCommand("Back Left", this::addInfo, this::addWarning, this::addError),
-            backRightModule.getPrematchCommand("Back Right", this::addInfo, this::addWarning, this::addError)),
+            frontLeftModule.getPrematchCommand(this::addInfo, this::addWarning, this::addError),
+            frontRightModule.getPrematchCommand(this::addInfo, this::addWarning, this::addError),
+            backLeftModule.getPrematchCommand(this::addInfo, this::addWarning, this::addError),
+            backRightModule.getPrematchCommand(this::addInfo, this::addWarning, this::addError)),
         // Test forward speed
         Commands.runOnce(() -> {
           controller.setLeftY(-1.0);

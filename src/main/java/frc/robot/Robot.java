@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.server.PathPlannerServer;
+import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -14,6 +15,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SwerveConstants;
@@ -38,6 +40,10 @@ public class Robot extends TimedRobot {
     if (RobotBase.isReal()) {
       DataLogManager.start();
       DriverStation.startDataLog(DataLogManager.getLog());
+
+      DataLogManager.log("Java Version: " + System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+      DataLogManager.log("WPILib Version: " + WPILibVersion.Version);
+      DataLogManager.log("REVLib Version: " + CANSparkMax.kAPIVersion);
     }
 
     PathPlannerServer.startServer(5855);
