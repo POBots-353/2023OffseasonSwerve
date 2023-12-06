@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.util.PolynomialRegression;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -31,6 +32,31 @@ public final class Constants {
     public static final double FIELD_LENGTH = 16.4592;
 
     public static final Pose2d redAllianceOrigin = new Pose2d(FIELD_LENGTH, FIELD_WIDTH, Rotation2d.fromDegrees(180.0));
+  }
+
+  public static class LimelightVisionConstants {
+    public static final double[] distances = new double[] {
+        0.50,
+        1.00,
+        1.50,
+        2.00,
+    };
+    public static final double[] xyStandardDeviations = new double[] {
+        0.014, // 0.50
+        0.020, // 1.00
+        0.150, // 1.50
+    };
+    public static final double[] thetaStandardDeviations = new double[] {
+        0.115, // 0.50
+        0.149, // 1.00
+        0.190, // 1.50
+    };
+
+    public static PolynomialRegression xyPolynomialRegression = new PolynomialRegression(distances,
+        xyStandardDeviations, 3);
+
+    public static PolynomialRegression thetaPolynomialRegression = new PolynomialRegression(distances,
+        thetaStandardDeviations, 3);
   }
 
   public static class SwerveConstants {
