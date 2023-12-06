@@ -20,7 +20,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -35,6 +34,7 @@ import frc.robot.Constants.SwerveConstants.BackRightModule;
 import frc.robot.Constants.SwerveConstants.FrontLeftModule;
 import frc.robot.Constants.SwerveConstants.FrontRightModule;
 import frc.robot.util.AllianceUtil;
+import frc.robot.util.LogUtil;
 
 public class Swerve extends VirtualSubsystem {
   private SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(SwerveConstants.wheelLocations);
@@ -116,7 +116,7 @@ public class Swerve extends VirtualSubsystem {
     });
 
     if (RobotBase.isReal()) {
-      DataLogManager.log("NavX Firmware Version: " + navx.getFirmwareVersion());
+      LogUtil.recordMetadata("NavX Firmware", navx.getFirmwareVersion());
     }
   }
 

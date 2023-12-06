@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.util.LogUtil;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -41,9 +42,10 @@ public class Robot extends TimedRobot {
       DataLogManager.start();
       DriverStation.startDataLog(DataLogManager.getLog());
 
-      DataLogManager.log("Java Version: " + System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
-      DataLogManager.log("WPILib Version: " + WPILibVersion.Version);
-      DataLogManager.log("REVLib Version: " + CANSparkMax.kAPIVersion);
+      LogUtil.recordMetadata("Java Version", System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+      LogUtil.recordMetadata("WPILib Version", WPILibVersion.Version);
+      LogUtil.recordMetadata("REVLib Version",
+          CANSparkMax.kAPIMajorVersion + "." + CANSparkMax.kAPIMinorVersion + "." + CANSparkMax.kAPIBuildVersion);
     }
 
     PathPlannerServer.startServer(5855);
