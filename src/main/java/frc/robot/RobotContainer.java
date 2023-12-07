@@ -167,6 +167,10 @@ public class RobotContainer {
           }
           addAlert(swervePrematchAlert);
         })
+        .handleInterrupt(() -> {
+          driverController.disableAllAxes();
+          driverController.disableAllButtons();
+        })
         .unless(DriverStation::isFMSAttached)
         .withName("Swerve Pre-Match");
 
