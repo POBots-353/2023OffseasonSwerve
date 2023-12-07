@@ -117,8 +117,6 @@ public class SwerveModule {
 
     driveEncoder.setPositionConversionFactor(SwerveConstants.drivePositionConversion);
     driveEncoder.setVelocityConversionFactor(SwerveConstants.driveVelocityConversion);
-
-    driveMotor.burnFlash();
   }
 
   public void configureTurnMotor() {
@@ -148,8 +146,6 @@ public class SwerveModule {
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(-Math.PI);
     turnPID.setPositionPIDWrappingMaxInput(Math.PI);
-
-    turnMotor.burnFlash();
   }
 
   private void configureAngleEncoder() {
