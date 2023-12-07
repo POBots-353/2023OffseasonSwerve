@@ -12,6 +12,8 @@ import frc.robot.commands.FollowPath;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.subsystems.Swerve;
 import frc.robot.util.Alert;
+import frc.robot.util.LogUtil;
+import frc.robot.util.PersistentSendableChooser;
 import frc.robot.util.Alert.AlertType;
 
 import java.util.ArrayList;
@@ -44,6 +46,7 @@ public class RobotContainer {
   private PowerDistribution powerDistribution = new PowerDistribution();
 
   private SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private PersistentSendableChooser<String> batteryChooser = new PersistentSendableChooser<>("Battery Number");
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final VirtualXboxController driverController = new VirtualXboxController(
@@ -61,10 +64,14 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     configureAutoChooser();
+    configureBatteryChooser();
     configurePreMatchChecks();
 
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
     SmartDashboard.putData("Power Distribution Panel", powerDistribution);
+
+    LogUtil.recordMetadata("Battery Number", batteryChooser.getSelectedName());
+    LogUtil.recordMetadata("Battery Nickname", batteryChooser.getSelected());
 
     swerve.setDefaultCommand(
         new SwerveDrive(driverController::getLeftY, driverController::getLeftX,
@@ -106,6 +113,18 @@ public class RobotContainer {
         new FollowPath("New New Path", swerve).andThen(Commands.run(swerve::lockModules, swerve)));
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
+  }
+
+  private void configureBatteryChooser() {
+    batteryChooser.addOption("2019.5 #2", "Al");
+    batteryChooser.addOption("2019.5 #3", "Daniel");
+    batteryChooser.addOption("2020 #1", "2020 #1");
+    batteryChooser.addOption("2020 #2", "2020 #2");
+    batteryChooser.addOption("2021 #1", "Fred");
+    batteryChooser.addOption("2024 #1", "2024 #1");
+    batteryChooser.addOption("2024 #2", "2024 #2");
+
+    SmartDashboard.putData("Battery Chooser", batteryChooser);
   }
 
   private void configurePreMatchChecks() {
