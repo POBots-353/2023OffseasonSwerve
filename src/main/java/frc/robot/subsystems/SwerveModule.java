@@ -26,13 +26,12 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.util.Alert;
-import frc.robot.util.LogUtil;
 import frc.robot.util.Alert.AlertType;
 
 /** Add your docs here. */
@@ -81,11 +80,9 @@ public class SwerveModule {
 
     resetToAbsolute();
 
-    if (RobotBase.isReal()) {
-      LogUtil.recordMetadata(moduleName + " Drive Firmware", driveMotor.getFirmwareString());
-      LogUtil.recordMetadata(moduleName + " Turn Firmware", turnMotor.getFirmwareString());
-      LogUtil.recordMetadata(moduleName + " CANCoder Firmware", canCoder.getFirmwareVersion());
-    }
+    DataLogManager.log(moduleName + " Drive Firmware: " + driveMotor.getFirmwareString());
+    DataLogManager.log(moduleName + " Turn Firmware: " + turnMotor.getFirmwareString());
+    DataLogManager.log(moduleName + " CANCoder Firmware: " + canCoder.getFirmwareVersion());
   }
 
   public SwerveModule(String moduleName, int driveID, int turnID, int encoderID) {
