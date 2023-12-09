@@ -42,7 +42,8 @@ public class Robot extends TimedRobot {
       DataLogManager.start();
       DriverStation.startDataLog(DataLogManager.getLog());
 
-      LogUtil.recordMetadata("Java Version", System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+      LogUtil.recordMetadata("Java Vendor", System.getProperty("java.vendor"));
+      LogUtil.recordMetadata("Java Version", System.getProperty("java.version"));
       LogUtil.recordMetadata("WPILib Version", WPILibVersion.Version);
       LogUtil.recordMetadata("REVLib Version",
           CANSparkMax.kAPIMajorVersion + "." + CANSparkMax.kAPIMinorVersion + "." + CANSparkMax.kAPIBuildVersion);
