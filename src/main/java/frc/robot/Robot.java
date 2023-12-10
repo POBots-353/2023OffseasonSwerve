@@ -48,6 +48,12 @@ public class Robot extends TimedRobot {
       LogUtil.recordMetadata("REVLib Version",
           CANSparkMax.kAPIMajorVersion + "." + CANSparkMax.kAPIMinorVersion + "." + CANSparkMax.kAPIBuildVersion);
       LogUtil.recordMetadata("Runtime Type", getRuntimeType().toString());
+
+      // Git and build information
+      LogUtil.recordMetadata("Project Name", BuildConstants.MAVEN_NAME);
+      LogUtil.recordMetadata("Build Date", BuildConstants.BUILD_DATE);
+      LogUtil.recordMetadata("Git SHA", BuildConstants.GIT_SHA);
+      LogUtil.recordMetadata("Git Date", BuildConstants.GIT_DATE);
     }
 
     PathPlannerServer.startServer(5855);
