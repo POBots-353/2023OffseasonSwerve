@@ -47,6 +47,7 @@ public class Robot extends TimedRobot {
       LogUtil.recordMetadata("WPILib Version", WPILibVersion.Version);
       LogUtil.recordMetadata("REVLib Version",
           CANSparkMax.kAPIMajorVersion + "." + CANSparkMax.kAPIMinorVersion + "." + CANSparkMax.kAPIBuildVersion);
+      LogUtil.recordMetadata("Runtime Type", getRuntimeType().toString());
     }
 
     PathPlannerServer.startServer(5855);
