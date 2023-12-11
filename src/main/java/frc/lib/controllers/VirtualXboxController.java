@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.event.EventLoop;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -29,6 +30,11 @@ public class VirtualXboxController extends CommandXboxController {
     for (XboxController.Axis axis : XboxController.Axis.values()) {
       virtualAxes.put(axis, Optional.empty());
     }
+
+    new Trigger(DriverStation::isDisabled).onTrue(Commands.runOnce(() -> {
+      disableAllAxes();
+      disableAllButtons();
+    }).ignoringDisable(true));
   }
 
   @Override
