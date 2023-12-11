@@ -9,6 +9,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.commands.FollowAprilTag;
 import frc.robot.commands.FollowPath;
+import frc.robot.commands.RadioPing;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.subsystems.Swerve;
 import frc.robot.util.Alert;
@@ -19,6 +20,7 @@ import frc.robot.util.Alert.AlertType;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -77,6 +79,20 @@ public class RobotContainer {
         new SwerveDrive(driverController::getLeftY, driverController::getLeftX,
             driverController::getRightX, driverController::getRightY, driverController::getLeftBumper,
             SwerveConstants.maxTranslationalSpeed, SwerveConstants.maxAngularSpeed, swerve));
+
+    new RadioPing()
+        .withTimeout(60.0)
+        .finallyDo((interrupted) -> {
+          if (!interrupted) {
+            DataLogManager.log("Received Connection!");
+            addInfoAlert("Received Connection!");
+          } else {
+            DataLogManager.log("Failed to receive connection");
+            addErrorAlert("Failed to receive connection");
+          }
+        })
+        .withName("Radio Ping")
+        .schedule();
   }
 
   public void updateSwerveOdometry() {
