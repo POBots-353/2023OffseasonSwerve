@@ -59,6 +59,8 @@ public class RobotContainer {
   private Alert generalPrematchAlert = new Alert("", AlertType.INFO);
   private Alert swervePrematchAlert = new Alert("", AlertType.INFO);
 
+  private boolean connectionFailed = false;
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -80,17 +82,20 @@ public class RobotContainer {
             driverController::getRightX, driverController::getRightY, driverController::getLeftBumper,
             SwerveConstants.maxTranslationalSpeed, SwerveConstants.maxAngularSpeed, swerve));
 
+    Command onConnectionSuccessful = Commands.runOnce(() -> {
+      DataLogManager.log("Connection successful!");
+    }).beforeStarting(Commands.waitSeconds(5.0))
+        .ignoringDisable(true);
+
+    Command onConnectionFailed = Commands.runOnce(() -> {
+      DataLogManager.log("Connection Failed!");
+    }).ignoringDisable(true);
+
     new RadioPing()
         .withTimeout(60.0)
-        .finallyDo((interrupted) -> {
-          if (!interrupted) {
-            DataLogManager.log("Received Connection!");
-            addInfoAlert("Received Connection!");
-          } else {
-            DataLogManager.log("Failed to receive connection");
-            addErrorAlert("Failed to receive connection");
-          }
-        })
+        .finallyDo((interrupted) -> connectionFailed = interrupted)
+        .andThen(
+            Commands.either(onConnectionFailed, onConnectionSuccessful, () -> connectionFailed))
         .withName("Radio Ping")
         .schedule();
   }
