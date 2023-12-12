@@ -100,6 +100,8 @@ public class SwerveModule {
     driveMotor.enableVoltageCompensation(SwerveConstants.voltageCompensation);
     driveMotor.setSmartCurrentLimit(SwerveConstants.driveCurrentLimit);
 
+    driveMotor.setIdleMode(IdleMode.kBrake);
+
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 1000 / SwerveConstants.odometryUpdateFrequency);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
@@ -123,6 +125,8 @@ public class SwerveModule {
 
     turnMotor.enableVoltageCompensation(SwerveConstants.voltageCompensation);
     turnMotor.setSmartCurrentLimit(SwerveConstants.turnCurrentLimit);
+
+    turnMotor.setIdleMode(IdleMode.kCoast);
 
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 500);
