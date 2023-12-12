@@ -83,11 +83,13 @@ public class RobotContainer {
             SwerveConstants.maxTranslationalSpeed, SwerveConstants.maxAngularSpeed, swerve));
 
     Command onConnectionSuccessful = Commands.runOnce(() -> {
+      addInfoAlert("Connection Successful!");
       DataLogManager.log("Connection successful!");
-    }).beforeStarting(Commands.waitSeconds(5.0))
+    }).beforeStarting(Commands.waitSeconds(2.5))
         .ignoringDisable(true);
 
     Command onConnectionFailed = Commands.runOnce(() -> {
+      addErrorAlert("Connection Failed!");
       DataLogManager.log("Connection Failed!");
     }).ignoringDisable(true);
 

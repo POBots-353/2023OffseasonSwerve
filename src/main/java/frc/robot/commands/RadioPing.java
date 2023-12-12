@@ -17,6 +17,8 @@ public class RadioPing extends CommandBase {
   private boolean receivedConnection = false;
   private int responseCount = 0;
 
+  boolean initialFailed = false;
+
   /** Creates a new RadioPing. */
   public RadioPing() {
     try {
@@ -34,6 +36,10 @@ public class RadioPing extends CommandBase {
         synchronized (this) {
           receivedConnection = true;
           responseCount++;
+        }
+      } else {
+        synchronized (this) {
+          initialFailed = true;
         }
       }
     } catch (Exception e) {
@@ -66,6 +72,10 @@ public class RadioPing extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return receivedConnection && responseCount >= 3;
+    if (!initialFailed) {
+      return receivedConnection;
+    } else {
+      return receivedConnection && responseCount >= 10;
+    }
   }
 }
