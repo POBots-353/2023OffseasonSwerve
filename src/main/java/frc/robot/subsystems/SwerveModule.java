@@ -109,6 +109,8 @@ public class SwerveModule {
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 500);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 500);
 
+    driveMotor.setCANTimeout(0);
+
     drivePID = driveMotor.getPIDController();
 
     drivePID.setP(SwerveConstants.driveP);
@@ -135,6 +137,8 @@ public class SwerveModule {
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 500);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 500);
+
+    turnMotor.setCANTimeout(0);
 
     turnEncoder.setPositionConversionFactor(SwerveConstants.turnPositionConversion);
 
