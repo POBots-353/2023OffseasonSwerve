@@ -180,8 +180,8 @@ public class RobotContainer {
         .unless(DriverStation::isFMSAttached)
         .withName("General Pre-Match");
 
-    CommandBase swervePreMatch = swerve.getPrematchCheckCommand(driverController)
-        .andThen(() -> {
+    CommandBase swervePreMatch = swerve.buildPrematch(driverController)
+        .finallyDo((interrupted) -> {
           removeAlert(swervePrematchAlert);
           if (swerve.containsErrors()) {
             swervePrematchAlert = new Alert("Swerve Pre-Match Failed!", AlertType.ERROR);

@@ -75,4 +75,24 @@ public abstract class VirtualSubsystem extends SubsystemBase {
   public CommandBase getPrematchCheckCommand(VirtualXboxController controller) {
     return Commands.none();
   }
+
+  public CommandBase buildPrematch(VirtualXboxController controller) {
+    return Commands.sequence(Commands.runOnce(() -> {
+      cancelCurrentCommand();
+      clearAlerts();
+      setSystemStatus("Running Pre-Match Check");
+    })).until(this::containsErrors)
+        .finallyDo((interrupted) -> {
+          cancelCurrentCommand();
+
+          if (interrupted && !containsErrors()) {
+            addError("Pre-Match Interrpted");
+          } else {
+            setSystemStatus("Pre-Match Successful!");
+          }
+
+          controller.disableAllAxes();
+          controller.disableAllButtons();
+        });
+  }
 }

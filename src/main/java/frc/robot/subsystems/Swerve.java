@@ -303,11 +303,6 @@ public class Swerve extends VirtualSubsystem {
   @Override
   public CommandBase getPrematchCheckCommand(VirtualXboxController controller) {
     return Commands.sequence(
-        Commands.runOnce(() -> {
-          cancelCurrentCommand();
-          clearAlerts();
-          setSystemStatus("Running Pre-Match Check");
-        }),
         // Make sure gyro is connected
         Commands.runOnce(() -> {
           if (!navx.isConnected()) {
@@ -436,19 +431,6 @@ public class Swerve extends VirtualSubsystem {
           }
 
           controller.disableAllAxes();
-        }))
-        .until(this::containsErrors)
-        .handleInterrupt(() -> {
-          addError("Pre-Match Interrupted");
-        })
-        .andThen(() -> {
-          cancelCurrentCommand();
-          controller.disableAllAxes();
-          controller.disableAllButtons();
-
-          if (!containsErrors()) {
-            setSystemStatus("Pre-Match Successful!");
-          }
-        });
+        }));
   }
 }
