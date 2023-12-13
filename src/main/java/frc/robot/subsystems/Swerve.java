@@ -62,6 +62,7 @@ public class Swerve extends VirtualSubsystem {
   private boolean isOpenLoop = false;
 
   private final double prematchDriveDelay = 1.0;
+  private final double prematchTranslationalTolerance = 0.1;
 
   /** Creates a new Swerve. */
   public Swerve() {
@@ -327,7 +328,7 @@ public class Swerve extends VirtualSubsystem {
           controller.disableAllButtons();
         }),
         // Test all modules
-        Commands.parallel(
+        Commands.sequence(
             frontLeftModule.getPrematchCommand(this::addInfo, this::addWarning, this::addError),
             frontRightModule.getPrematchCommand(this::addInfo, this::addWarning, this::addError),
             backLeftModule.getPrematchCommand(this::addInfo, this::addWarning, this::addError),
@@ -340,6 +341,8 @@ public class Swerve extends VirtualSubsystem {
         Commands.runOnce(() -> {
           if (getChassisSpeeds().vxMetersPerSecond < Units.feetToMeters(10.0)) {
             addError("Forward speed too slow");
+          } else if (Math.abs(getChassisSpeeds().vyMetersPerSecond) > prematchTranslationalTolerance) {
+            addError("Strafe speed too high");
           } else {
             addInfo("Forward drive successful");
           }
@@ -366,6 +369,8 @@ public class Swerve extends VirtualSubsystem {
         Commands.runOnce(() -> {
           if (getChassisSpeeds().vxMetersPerSecond > Units.feetToMeters(-10.0)) {
             addError("Backward speed too slow");
+          } else if (Math.abs(getChassisSpeeds().vyMetersPerSecond) > prematchTranslationalTolerance) {
+            addError("Strafe speed too high");
           } else {
             addInfo("Backward drive successful");
           }
@@ -381,6 +386,8 @@ public class Swerve extends VirtualSubsystem {
         Commands.runOnce(() -> {
           if (getChassisSpeeds().vyMetersPerSecond < Units.feetToMeters(10.0)) {
             addError("Left speed too slow");
+          } else if (Math.abs(getChassisSpeeds().vxMetersPerSecond) > prematchTranslationalTolerance) {
+            addError("Forward/Backward speed too high");
           } else {
             addInfo("Left drive sucessful");
           }
@@ -396,6 +403,8 @@ public class Swerve extends VirtualSubsystem {
         Commands.runOnce(() -> {
           if (getChassisSpeeds().vyMetersPerSecond > Units.feetToMeters(-10.0)) {
             addError("Right speed too slow");
+          } else if (Math.abs(getChassisSpeeds().vxMetersPerSecond) > prematchTranslationalTolerance) {
+            addError("Forward/Backward speed too high");
           } else {
             addInfo("Right drive successful");
           }
