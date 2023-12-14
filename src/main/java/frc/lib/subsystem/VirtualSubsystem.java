@@ -51,7 +51,7 @@ public abstract class VirtualSubsystem extends SubsystemBase {
 
   public final void addError(String message) {
     addAlert(new Alert(getName() + "/Alerts", message, AlertType.ERROR));
-    setSystemStatus("Prematch failed with reason: \"" + message + "\"");
+    setSystemStatus("Pre-Match failed with reason: \"" + message + "\"");
   }
 
   public final void setSystemStatus(String status) {
@@ -81,13 +81,15 @@ public abstract class VirtualSubsystem extends SubsystemBase {
       cancelCurrentCommand();
       clearAlerts();
       setSystemStatus("Running Pre-Match Check");
-    })).until(this::containsErrors)
+    }),
+        getPrematchCheckCommand(controller))
+        .until(this::containsErrors)
         .finallyDo((interrupted) -> {
           cancelCurrentCommand();
 
           if (interrupted && !containsErrors()) {
             addError("Pre-Match Interrpted");
-          } else {
+          } else if (!interrupted && !containsErrors()) {
             setSystemStatus("Pre-Match Successful!");
           }
 
