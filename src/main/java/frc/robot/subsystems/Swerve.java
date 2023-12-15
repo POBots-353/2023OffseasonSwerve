@@ -325,7 +325,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Gyro zero successful");
           }
 
-          controller.disableAllButtons();
+          controller.clearVirtualButtons();
         }),
         // Test all modules
         Commands.sequence(
@@ -347,7 +347,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Forward drive successful");
           }
 
-          controller.disableAllAxes();
+          controller.clearVirtualAxes();
         }),
         // Test slowing down to 0 m/s
         Commands.waitSeconds(prematchDriveDelay),
@@ -359,7 +359,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Slow down successful");
           }
 
-          controller.disableAllAxes();
+          controller.clearVirtualAxes();
         }),
         // Test backward speed
         Commands.runOnce(() -> {
@@ -375,7 +375,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Backward drive successful");
           }
 
-          controller.disableAllAxes();
+          controller.clearVirtualAxes();
         }),
         Commands.waitSeconds(prematchDriveDelay),
         // Test left speed
@@ -392,7 +392,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Left drive sucessful");
           }
 
-          controller.disableAllAxes();
+          controller.clearVirtualAxes();
         }),
         Commands.waitSeconds(prematchDriveDelay),
         // Test right speed
@@ -409,7 +409,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Right drive successful");
           }
 
-          controller.disableAllAxes();
+          controller.clearVirtualAxes();
         }),
         Commands.waitSeconds(prematchDriveDelay),
         // Test angular CW speed
@@ -424,7 +424,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Clockwise rotation successful");
           }
 
-          controller.disableAllAxes();
+          controller.clearVirtualAxes();
         }),
         Commands.waitSeconds(prematchDriveDelay),
         // Test angular CCW speed
@@ -439,7 +439,7 @@ public class Swerve extends VirtualSubsystem {
             addInfo("Counter Clockwise rotation successful");
           }
 
-          controller.disableAllAxes();
+          controller.clearVirtualAxes();
         }));
   }
 }

@@ -32,8 +32,8 @@ public class VirtualXboxController extends CommandXboxController {
     }
 
     new Trigger(DriverStation::isDisabled).onTrue(Commands.runOnce(() -> {
-      disableAllAxes();
-      disableAllButtons();
+      clearVirtualAxes();
+      clearVirtualButtons();
     }).ignoringDisable(true));
   }
 
@@ -241,13 +241,13 @@ public class VirtualXboxController extends CommandXboxController {
     virtualButtons.replace(button, state);
   }
 
-  public void disableAllAxes() {
+  public void clearVirtualAxes() {
     for (Axis axis : virtualAxes.keySet()) {
       virtualAxes.replace(axis, Optional.empty());
     }
   }
 
-  public void disableAllButtons() {
+  public void clearVirtualButtons() {
     for (Button button : virtualButtons.keySet()) {
       virtualButtons.replace(button, false);
     }

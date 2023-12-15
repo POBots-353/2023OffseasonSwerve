@@ -91,8 +91,8 @@ public abstract class VirtualSubsystem extends SubsystemBase {
             setSystemStatus("Pre-Match Successful!");
           }
 
-          controller.disableAllAxes();
-          controller.disableAllButtons();
+          controller.clearVirtualAxes();
+          controller.clearVirtualButtons();
         });
   }
 }
