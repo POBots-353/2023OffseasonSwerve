@@ -172,11 +172,15 @@ public class SwerveModule {
   public void setState(SwerveModuleState state, boolean isOpenLoop, boolean allowTurnInPlace) {
     SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getAngle());
 
-    if (optimizedState.speedMetersPerSecond != 0.0 || allowTurnInPlace) {
-      turnPID.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
-    } else {
-      turnMotor.set(0.0);
+    if (optimizedState.speedMetersPerSecond == 0.0 && !allowTurnInPlace) {
+      if (prevVelocity == 0.0) {
+        optimizedState.angle = desiredState.angle;
+      } else {
+        optimizedState.angle = Rotation2d.fromRadians(turnEncoder.getPosition());
+      }
     }
+
+    turnPID.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
 
     double currentVelocity = optimizedState.speedMetersPerSecond;
 
