@@ -173,11 +173,7 @@ public class SwerveModule {
     SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getAngle());
 
     if (optimizedState.speedMetersPerSecond == 0.0 && !allowTurnInPlace) {
-      if (prevVelocity == 0.0) {
-        optimizedState.angle = desiredState.angle;
-      } else {
-        optimizedState.angle = Rotation2d.fromRadians(turnEncoder.getPosition());
-      }
+      optimizedState.angle = desiredState.angle;
     }
 
     turnPID.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
