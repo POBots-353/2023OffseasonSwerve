@@ -109,8 +109,6 @@ public class SwerveModule {
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 500);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 500);
 
-    driveMotor.setCANTimeout(0);
-
     drivePID = driveMotor.getPIDController();
 
     drivePID.setP(SwerveConstants.driveP);
@@ -118,6 +116,8 @@ public class SwerveModule {
 
     driveEncoder.setPositionConversionFactor(SwerveConstants.drivePositionConversion);
     driveEncoder.setVelocityConversionFactor(SwerveConstants.driveVelocityConversion);
+
+    driveMotor.setCANTimeout(1);
   }
 
   public void configureTurnMotor() {
@@ -138,8 +138,6 @@ public class SwerveModule {
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 500);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 500);
 
-    turnMotor.setCANTimeout(0);
-
     turnEncoder.setPositionConversionFactor(SwerveConstants.turnPositionConversion);
 
     turnPID = turnMotor.getPIDController();
@@ -151,6 +149,8 @@ public class SwerveModule {
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(-Math.PI);
     turnPID.setPositionPIDWrappingMaxInput(Math.PI);
+
+    turnMotor.setCANTimeout(1);
   }
 
   private void configureAngleEncoder() {
@@ -169,10 +169,14 @@ public class SwerveModule {
     turnEncoder.setPosition(position.getRadians());
   }
 
-  public void setState(SwerveModuleState state, boolean isOpenLoop) {
+  public void setState(SwerveModuleState state, boolean isOpenLoop, boolean allowTurnInPlace) {
     SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getAngle());
 
-    turnPID.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
+    if (optimizedState.speedMetersPerSecond != 0.0 || allowTurnInPlace) {
+      turnPID.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
+    } else {
+      turnMotor.set(0.0);
+    }
 
     double currentVelocity = optimizedState.speedMetersPerSecond;
 

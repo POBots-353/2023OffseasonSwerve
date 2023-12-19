@@ -60,6 +60,7 @@ public class Swerve extends VirtualSubsystem {
   private Field2d field = new Field2d();
 
   private boolean isOpenLoop = false;
+  private boolean allowTurnInPlace = false;
 
   private final double prematchDriveDelay = 1.0;
   private final double prematchTranslationalTolerance = 0.1;
@@ -145,7 +146,7 @@ public class Swerve extends VirtualSubsystem {
    * @param turn    The angular velocity of the robot (CCW is +)
    */
   public void driveFieldOriented(double forward, double strafe, double turn) {
-    driveFieldOriented(forward, strafe, turn, true, false);
+    driveFieldOriented(forward, strafe, turn, true, false, false);
   }
 
   /**
@@ -160,25 +161,28 @@ public class Swerve extends VirtualSubsystem {
    *                    relative to the turning speed
    * @param isOpenLoop  Weather the drive motors should be open loop
    */
-  public void driveFieldOriented(double forward, double strafe, double turn, boolean fudgeFactor, boolean isOpenLoop) {
+  public void driveFieldOriented(double forward, double strafe, double turn, boolean fudgeFactor, boolean isOpenLoop,
+      boolean allowTurnInPlace) {
     ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(forward, -strafe, turn, getRotation());
-    setChassisSpeeds(chassisSpeeds, fudgeFactor, isOpenLoop);
+    setChassisSpeeds(chassisSpeeds, fudgeFactor, isOpenLoop, allowTurnInPlace);
   }
 
   public void driveRobotOriented(double forward, double strafe, double turn) {
-    driveRobotOriented(forward, strafe, turn, true, false);
+    driveRobotOriented(forward, strafe, turn, true, false, false);
   }
 
-  public void driveRobotOriented(double forward, double strafe, double turn, boolean fudgeFactor, boolean isOpenLoop) {
+  public void driveRobotOriented(double forward, double strafe, double turn, boolean fudgeFactor, boolean isOpenLoop,
+      boolean allowTurnInPlace) {
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(forward, -strafe, turn);
-    setChassisSpeeds(chassisSpeeds, fudgeFactor, isOpenLoop);
+    setChassisSpeeds(chassisSpeeds, fudgeFactor, isOpenLoop, allowTurnInPlace);
   }
 
   public void setChassisSpeeds(ChassisSpeeds speeds) {
-    setChassisSpeeds(speeds, true, false);
+    setChassisSpeeds(speeds, true, false, false);
   }
 
-  public void setChassisSpeeds(ChassisSpeeds speeds, boolean fudgeFactor, boolean isOpenLoop) {
+  public void setChassisSpeeds(ChassisSpeeds speeds, boolean fudgeFactor, boolean isOpenLoop,
+      boolean allowTurnInPlace) {
     // Open loop compensation to correct for skewing
     // https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
     double dt = 0.02;
@@ -194,28 +198,25 @@ public class Swerve extends VirtualSubsystem {
       speeds = getFudgeFactoredSpeeds(speeds);
     }
 
-    setModuleStates(swerveKinematics.toSwerveModuleStates(speeds), isOpenLoop);
+    setModuleStates(swerveKinematics.toSwerveModuleStates(speeds), isOpenLoop, allowTurnInPlace);
   }
 
   public void lockModules() {
-    lockModules(false);
-  }
-
-  public void lockModules(boolean isOpenLoop) {
     setModuleStates(new SwerveModuleState[] { new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
         new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
-        new SwerveModuleState(0, Rotation2d.fromDegrees(45)) }, isOpenLoop);
+        new SwerveModuleState(0, Rotation2d.fromDegrees(45)) }, false, true);
   }
 
   public void setModuleStates(SwerveModuleState[] states) {
-    setModuleStates(states, false);
+    setModuleStates(states, false, false);
   }
 
-  public void setModuleStates(SwerveModuleState[] states, boolean isOpenLoop) {
+  public void setModuleStates(SwerveModuleState[] states, boolean isOpenLoop, boolean allowTurnInPlace) {
     SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.maxModuleSpeed);
 
     targetStates = states;
     this.isOpenLoop = isOpenLoop;
+    this.allowTurnInPlace = allowTurnInPlace;
   }
 
   public SwerveDriveKinematics getKinematics() {
@@ -284,10 +285,10 @@ public class Swerve extends VirtualSubsystem {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    frontLeftModule.setState(targetStates[0], isOpenLoop);
-    frontRightModule.setState(targetStates[1], isOpenLoop);
-    backLeftModule.setState(targetStates[2], isOpenLoop);
-    backRightModule.setState(targetStates[3], isOpenLoop);
+    frontLeftModule.setState(targetStates[0], isOpenLoop, allowTurnInPlace);
+    frontRightModule.setState(targetStates[1], isOpenLoop, allowTurnInPlace);
+    backLeftModule.setState(targetStates[2], isOpenLoop, allowTurnInPlace);
+    backRightModule.setState(targetStates[3], isOpenLoop, allowTurnInPlace);
 
     field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
 
