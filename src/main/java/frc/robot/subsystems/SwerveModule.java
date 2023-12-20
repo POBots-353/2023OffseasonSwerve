@@ -27,6 +27,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -78,8 +79,6 @@ public class SwerveModule {
     configureTurnMotor();
     configureAngleEncoder();
 
-    resetToAbsolute();
-
     DataLogManager.log(moduleName + " Drive Firmware: " + driveMotor.getFirmwareString());
     DataLogManager.log(moduleName + " Turn Firmware: " + turnMotor.getFirmwareString());
     DataLogManager.log(moduleName + " CANCoder Firmware: " + canCoder.getFirmwareVersion());
@@ -116,8 +115,6 @@ public class SwerveModule {
 
     driveEncoder.setPositionConversionFactor(SwerveConstants.drivePositionConversion);
     driveEncoder.setVelocityConversionFactor(SwerveConstants.driveVelocityConversion);
-
-    driveMotor.setCANTimeout(1);
   }
 
   public void configureTurnMotor() {
@@ -149,8 +146,6 @@ public class SwerveModule {
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(-Math.PI);
     turnPID.setPositionPIDWrappingMaxInput(Math.PI);
-
-    turnMotor.setCANTimeout(1);
   }
 
   private void configureAngleEncoder() {
@@ -162,11 +157,17 @@ public class SwerveModule {
     canCoder.configSensorDirection(SwerveConstants.canCoderInverted);
   }
 
-  private void resetToAbsolute() {
+  public void resetToAbsolute() {
     Rotation2d position = Rotation2d
         .fromDegrees(canCoder.getAbsolutePosition() - angleOffset.getDegrees());
 
-    turnEncoder.setPosition(position.getRadians());
+    // REV please make it so we don't have to do this, this isn't good
+    for (int i = 0; i < 5; i++) {
+      if (turnEncoder.setPosition(position.getRadians()) == REVLibError.kOk) {
+        break;
+      }
+      Timer.delay(0.02);
+    }
   }
 
   public void setState(SwerveModuleState state, boolean isOpenLoop, boolean allowTurnInPlace) {
@@ -174,6 +175,8 @@ public class SwerveModule {
 
     if (optimizedState.speedMetersPerSecond == 0.0 && !allowTurnInPlace) {
       optimizedState.angle = desiredState.angle;
+
+      optimizedState = SwerveModuleState.optimize(optimizedState, getAngle());
     }
 
     turnPID.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
