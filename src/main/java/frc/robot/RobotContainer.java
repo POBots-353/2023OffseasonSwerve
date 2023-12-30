@@ -121,7 +121,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverController.x().whileTrue(Commands.run(swerve::lockModules, swerve).withName("Lock Modules"));
+    driverController.x().whileTrue(swerve.run(swerve::lockModules).withName("Lock Modules"));
 
     driverController.start().and(driverController.back())
         .toggleOnTrue(Commands.runOnce(swerve::zeroYaw).ignoringDisable(true));
@@ -131,9 +131,9 @@ public class RobotContainer {
     autoChooser.setDefaultOption("None", Commands.none());
     autoChooser.addOption("[Demo] Follow April Tag", new FollowAprilTag(swerve));
     autoChooser.addOption("[PathPlanner] New Path (Test Path 1)",
-        new FollowPath("New Path", swerve).andThen(Commands.run(swerve::lockModules, swerve)));
+        new FollowPath("New Path", swerve).andThen(swerve.run(swerve::lockModules)));
     autoChooser.addOption("[PathPlanner] New New Path (Test Path 2)",
-        new FollowPath("New New Path", swerve).andThen(Commands.run(swerve::lockModules, swerve)));
+        new FollowPath("New New Path", swerve).andThen(swerve.run(swerve::lockModules)));
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
