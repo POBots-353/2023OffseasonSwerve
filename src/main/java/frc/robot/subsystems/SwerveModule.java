@@ -55,8 +55,9 @@ public class SwerveModule {
       SwerveConstants.driveKv, SwerveConstants.driveKa);
 
   private SwerveModuleState desiredState = new SwerveModuleState();
-
-  private double prevVelocity = 0.0;
+  private SwerveModuleState previousState = new SwerveModuleState();
+  private boolean isOpenLoop = false;
+  private boolean allowTurnInPlace = false;
 
   private Alert driveMotorTemperatureAlert = new Alert("Swerve/Alerts", "drive motor temperature is above 50°C",
       AlertType.WARNING);
@@ -91,6 +92,8 @@ public class SwerveModule {
   public void configureDriveMotor() {
     driveMotor.restoreFactoryDefaults();
 
+    driveMotor.setCANTimeout(250);
+
     driveMotor.setInverted(SwerveConstants.driveMotorInverted);
 
     driveMotor.setOpenLoopRampRate(SwerveConstants.openLoopRamp);
@@ -115,10 +118,14 @@ public class SwerveModule {
 
     driveEncoder.setPositionConversionFactor(SwerveConstants.drivePositionConversion);
     driveEncoder.setVelocityConversionFactor(SwerveConstants.driveVelocityConversion);
+
+    driveMotor.setCANTimeout(0);
   }
 
   public void configureTurnMotor() {
     turnMotor.restoreFactoryDefaults();
+
+    turnMotor.setCANTimeout(250);
 
     turnMotor.setInverted(SwerveConstants.turnMotorInverted);
 
@@ -146,6 +153,8 @@ public class SwerveModule {
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(-Math.PI);
     turnPID.setPositionPIDWrappingMaxInput(Math.PI);
+
+    turnMotor.setCANTimeout(0);
   }
 
   private void configureAngleEncoder() {
@@ -161,6 +170,8 @@ public class SwerveModule {
     Rotation2d position = Rotation2d
         .fromDegrees(canCoder.getAbsolutePosition() - angleOffset.getDegrees());
 
+    turnMotor.setCANTimeout(250);
+
     // REV please make it so we don't have to do this, this isn't good
     for (int i = 0; i < 5; i++) {
       if (turnEncoder.setPosition(position.getRadians()) == REVLibError.kOk) {
@@ -168,35 +179,45 @@ public class SwerveModule {
       }
       Timer.delay(0.02);
     }
+
+    turnMotor.setCANTimeout(0);
   }
 
   public void setState(SwerveModuleState state, boolean isOpenLoop, boolean allowTurnInPlace) {
     SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getAngle());
 
     if (optimizedState.speedMetersPerSecond == 0.0 && !allowTurnInPlace) {
-      optimizedState.angle = desiredState.angle;
+      optimizedState.angle = previousState.angle;
 
       optimizedState = SwerveModuleState.optimize(optimizedState, getAngle());
     }
 
-    turnPID.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
-
-    double currentVelocity = optimizedState.speedMetersPerSecond;
-
-    if (isOpenLoop) {
-      driveMotor.set(currentVelocity / SwerveConstants.maxModuleSpeed);
-    } else {
-      double feedForward = driveFeedforward.calculate(currentVelocity, (currentVelocity - prevVelocity) / 0.020);
-
-      drivePID.setReference(optimizedState.speedMetersPerSecond, ControlType.kVelocity, 0, feedForward,
-          ArbFFUnits.kVoltage);
-    }
-
+    previousState = desiredState;
     desiredState = optimizedState;
-    prevVelocity = currentVelocity;
+    this.isOpenLoop = isOpenLoop;
+    this.allowTurnInPlace = allowTurnInPlace;
   }
 
-  public void updateTelemetry() {
+  private void setSpeed(double speedMetersPerSecond) {
+    if (isOpenLoop) {
+      driveMotor.set(speedMetersPerSecond / SwerveConstants.maxModuleSpeed);
+    } else {
+      double feedForward = driveFeedforward.calculate(speedMetersPerSecond,
+          (speedMetersPerSecond - previousState.speedMetersPerSecond) / 0.020);
+
+      drivePID.setReference(speedMetersPerSecond, ControlType.kVelocity, 0, feedForward,
+          ArbFFUnits.kVoltage);
+    }
+  }
+
+  private void setAngle(Rotation2d angle) {
+    turnPID.setReference(angle.getRadians(), ControlType.kPosition);
+  }
+
+  public void periodic() {
+    setSpeed(desiredState.speedMetersPerSecond);
+    setAngle(desiredState.angle);
+
     // Setpoint data
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Velocity", getVelocity());
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Angle", getAngle().getDegrees());
@@ -215,6 +236,9 @@ public class SwerveModule {
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Turn Applied Output", turnMotor.getAppliedOutput());
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Drive Output Current", driveMotor.getOutputCurrent());
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Turn Output Current", turnMotor.getOutputCurrent());
+
+    SmartDashboard.putBoolean("Swerve/" + moduleName + "/Open Loop", isOpenLoop);
+    SmartDashboard.putBoolean("Swerve/" + moduleName + "/Allow Turn in Place", allowTurnInPlace);
 
     // Alerts for high temperature
     double driveMotorTemperature = driveMotor.getMotorTemperature();
@@ -325,7 +349,7 @@ public class SwerveModule {
     return new SwerveModuleState(getVelocity(), getAngle());
   }
 
-  public SwerveModuleState getDesiredState() {
+  public SwerveModuleState getState() {
     return desiredState;
   }
 

@@ -51,17 +51,11 @@ public class Swerve extends VirtualSubsystem {
   private SwerveModule backRightModule = new SwerveModule("Back Right", BackRightModule.driveID, BackRightModule.turnID,
       BackRightModule.encoderID, BackRightModule.angleOffset);
 
-  private SwerveModuleState[] targetStates = { new SwerveModuleState(), new SwerveModuleState(),
-      new SwerveModuleState(), new SwerveModuleState() };
-
   private AHRS navx = new AHRS(SPI.Port.kMXP, (byte) SwerveConstants.odometryUpdateFrequency);
 
   private SwerveDriveOdometry swerveOdometry;
 
   private Field2d field = new Field2d();
-
-  private boolean isOpenLoop = false;
-  private boolean allowTurnInPlace = false;
 
   private final double prematchDriveDelay = 1.0;
   private final double prematchTranslationalTolerance = 0.1;
@@ -119,7 +113,7 @@ public class Swerve extends VirtualSubsystem {
 
     DataLogManager.log("NavX Firmware: " + navx.getFirmwareVersion());
 
-    Timer.delay(0.20);
+    Timer.delay(1.00);
 
     frontLeftModule.resetToAbsolute();
     frontRightModule.resetToAbsolute();
@@ -222,9 +216,10 @@ public class Swerve extends VirtualSubsystem {
   public void setModuleStates(SwerveModuleState[] states, boolean isOpenLoop, boolean allowTurnInPlace) {
     SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.maxModuleSpeed);
 
-    targetStates = states;
-    this.isOpenLoop = isOpenLoop;
-    this.allowTurnInPlace = allowTurnInPlace;
+    frontLeftModule.setState(states[0], isOpenLoop, allowTurnInPlace);
+    frontRightModule.setState(states[1], isOpenLoop, allowTurnInPlace);
+    backLeftModule.setState(states[2], isOpenLoop, allowTurnInPlace);
+    backRightModule.setState(states[3], isOpenLoop, allowTurnInPlace);
   }
 
   public SwerveDriveKinematics getKinematics() {
@@ -274,12 +269,11 @@ public class Swerve extends VirtualSubsystem {
 
     SmartDashboard.putNumberArray("Swerve/Module States", moduleStates);
 
-    double[] desiredStates = new double[] { frontLeftModule.getDesiredState().angle.getDegrees(),
-        frontLeftModule.getDesiredState().speedMetersPerSecond,
-        frontRightModule.getDesiredState().angle.getDegrees(),
-        frontRightModule.getDesiredState().speedMetersPerSecond, backLeftModule.getDesiredState().angle.getDegrees(),
-        backLeftModule.getDesiredState().speedMetersPerSecond, backRightModule.getDesiredState().angle.getDegrees(),
-        backRightModule.getDesiredState().speedMetersPerSecond };
+    double[] desiredStates = new double[] { frontLeftModule.getState().angle.getDegrees(),
+        frontLeftModule.getState().speedMetersPerSecond, frontRightModule.getState().angle.getDegrees(),
+        frontRightModule.getState().speedMetersPerSecond, backLeftModule.getState().angle.getDegrees(),
+        backLeftModule.getState().speedMetersPerSecond, backRightModule.getState().angle.getDegrees(),
+        backRightModule.getState().speedMetersPerSecond };
 
     SmartDashboard.putNumberArray("Swerve/Desired States", desiredStates);
 
@@ -293,19 +287,14 @@ public class Swerve extends VirtualSubsystem {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    frontLeftModule.setState(targetStates[0], isOpenLoop, allowTurnInPlace);
-    frontRightModule.setState(targetStates[1], isOpenLoop, allowTurnInPlace);
-    backLeftModule.setState(targetStates[2], isOpenLoop, allowTurnInPlace);
-    backRightModule.setState(targetStates[3], isOpenLoop, allowTurnInPlace);
+    frontLeftModule.periodic();
+    frontRightModule.periodic();
+    backLeftModule.periodic();
+    backRightModule.periodic();
 
     field.setRobotPose(AllianceUtil.convertToBlueOrigin(swerveOdometry.getPoseMeters()));
 
     SmartDashboard.putString("Swerve/Status", getSystemStatus());
-
-    frontLeftModule.updateTelemetry();
-    frontRightModule.updateTelemetry();
-    backLeftModule.updateTelemetry();
-    backRightModule.updateTelemetry();
 
     publishModuleStates();
   }
