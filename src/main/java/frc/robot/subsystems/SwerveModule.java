@@ -104,7 +104,7 @@ public class SwerveModule {
 
     driveMotor.setIdleMode(IdleMode.kBrake);
 
-    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 1000 / SwerveConstants.odometryUpdateFrequency);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
@@ -134,7 +134,7 @@ public class SwerveModule {
 
     turnMotor.setIdleMode(IdleMode.kCoast);
 
-    turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500);
+    turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 20);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 500);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 1000 / SwerveConstants.odometryUpdateFrequency);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
