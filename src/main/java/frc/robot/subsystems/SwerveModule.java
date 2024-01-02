@@ -186,8 +186,8 @@ public class SwerveModule {
   public void setState(SwerveModuleState state, boolean isOpenLoop, boolean allowTurnInPlace) {
     SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getAngle());
 
-    if (optimizedState.speedMetersPerSecond == 0.0 && !allowTurnInPlace) {
-      optimizedState.angle = previousState.angle;
+    if (optimizedState.speedMetersPerSecond == 0.0 && desiredState.speedMetersPerSecond != 0.0 && !allowTurnInPlace) {
+      optimizedState.angle = desiredState.angle;
 
       optimizedState = SwerveModuleState.optimize(optimizedState, getAngle());
     }
