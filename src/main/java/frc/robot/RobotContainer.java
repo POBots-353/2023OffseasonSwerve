@@ -9,7 +9,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.commands.FollowAprilTag;
 import frc.robot.commands.FollowPath;
-import frc.robot.commands.RadioPing;
+import frc.robot.commands.StartupConnectionCheck;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.subsystems.Swerve;
 import frc.robot.util.Alert;
@@ -59,8 +59,6 @@ public class RobotContainer {
   private Alert generalPrematchAlert = new Alert("", AlertType.INFO);
   private Alert swervePrematchAlert = new Alert("", AlertType.INFO);
 
-  private boolean connectionFailed = false;
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -85,21 +83,14 @@ public class RobotContainer {
     Command onConnectionSuccessful = Commands.runOnce(() -> {
       addInfoAlert("Connection Successful!");
       DataLogManager.log("Connection successful!");
-    }).beforeStarting(Commands.waitSeconds(2.5))
-        .ignoringDisable(true);
+    }).ignoringDisable(true);
 
     Command onConnectionFailed = Commands.runOnce(() -> {
       addErrorAlert("Connection Failed!");
       DataLogManager.log("Connection Failed!");
     }).ignoringDisable(true);
 
-    new RadioPing()
-        .withTimeout(60.0)
-        .finallyDo((interrupted) -> connectionFailed = interrupted)
-        .andThen(
-            Commands.either(onConnectionFailed, onConnectionSuccessful, () -> connectionFailed))
-        .withName("Radio Ping")
-        .schedule();
+    new StartupConnectionCheck(onConnectionSuccessful, onConnectionFailed).schedule();
   }
 
   public void updateSwerveOdometry() {

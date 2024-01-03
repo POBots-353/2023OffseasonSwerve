@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import java.net.InetAddress;
+import java.util.function.Consumer;
 
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -18,16 +19,23 @@ public class RadioPing extends CommandBase {
   private int responseCount = 0;
 
   boolean initialFailed = false;
+  Consumer<Boolean> onInitialFailed;
 
   /** Creates a new RadioPing. */
-  public RadioPing() {
+  public RadioPing(Consumer<Boolean> onInitialFailed) {
     try {
       ipAddress = InetAddress.getByName("10.3.53.1");
     } catch (Exception e) {
       e.printStackTrace();
     }
 
+    this.onInitialFailed = onInitialFailed;
     notifier = new Notifier(this::pingIPAddress);
+  }
+
+  public RadioPing() {
+    this((value) -> {
+    });
   }
 
   private void pingIPAddress() {
@@ -67,6 +75,7 @@ public class RadioPing extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     notifier.stop();
+    onInitialFailed.accept(initialFailed);
   }
 
   // Returns true when the command should end.
