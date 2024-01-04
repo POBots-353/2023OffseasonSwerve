@@ -27,6 +27,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -75,6 +76,8 @@ public class SwerveModule {
     canCoder = new CANCoder(encoderID);
 
     this.angleOffset = angleOffset;
+
+    Timer.delay(0.02);
 
     configureDriveMotor();
     configureTurnMotor();
@@ -186,7 +189,7 @@ public class SwerveModule {
   public void setState(SwerveModuleState state, boolean isOpenLoop, boolean allowTurnInPlace) {
     SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getAngle());
 
-    if (optimizedState.speedMetersPerSecond == 0.0 && desiredState.speedMetersPerSecond != 0.0 && !allowTurnInPlace) {
+    if (optimizedState.speedMetersPerSecond == 0.0 && !allowTurnInPlace) {
       optimizedState.angle = desiredState.angle;
 
       optimizedState = SwerveModuleState.optimize(optimizedState, getAngle());
@@ -217,6 +220,11 @@ public class SwerveModule {
   public void periodic() {
     setSpeed(desiredState.speedMetersPerSecond);
     setAngle(desiredState.angle);
+
+    // Convoluted fix to prevent module from jittering on re-enable
+    if (DriverStation.isDisabled()) {
+      setState(desiredState, isOpenLoop, allowTurnInPlace);
+    }
 
     // Setpoint data
     SmartDashboard.putNumber("Swerve/" + moduleName + "/Velocity", getVelocity());
